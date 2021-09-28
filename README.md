@@ -1,2 +1,3 @@
 # SEGroup
-Marcus Wong Ken Ji
+- Marcus Wong Ken Ji
+- Richard Schneider
