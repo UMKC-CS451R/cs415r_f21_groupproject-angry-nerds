@@ -1,0 +1,114 @@
+{
+    "transactions": [
+        {
+            "transactionID": 44,
+            "timeMonth": 1,
+            "timeDay": 12,
+            "timeYear": 2020,
+            "amountDollars": -9,
+            "amountCents": 0,
+            "endBalanceDollars": 5116,
+            "endBalanceCents": 53,
+            "vendor": "Starbucks"
+        },
+        {
+            "transactionID": 43,
+            "timeMonth": 1,
+            "timeDay": 10,
+            "timeYear": 2020,
+            "amountDollars": -13,
+            "amountCents": 0,
+            "endBalanceDollars": 5125,
+            "endBalanceCents": 53,
+            "vendor": "Jose Peppers"
+        },
+        {
+            "transactionID": 42,
+            "timeMonth": 1,
+            "timeDay": 10,
+            "timeYear": 2020,
+            "amountDollars": -98,
+            "amountCents": 0,
+            "endBalanceDollars": 5138,
+            "endBalanceCents": 53,
+            "vendor": "Target"
+        },
+        {
+            "transactionID": 41,
+            "timeMonth": 1,
+            "timeDay": 6,
+            "timeYear": 2020,
+            "amountDollars": -43,
+            "amountCents": 0,
+            "endBalanceDollars": 5236,
+            "endBalanceCents": 53,
+            "vendor": "Price Chopper"
+        },
+        {
+            "transactionID": 40,
+            "timeMonth": 1,
+            "timeDay": 5,
+            "timeYear": 2020,
+            "amountDollars": -56,
+            "amountCents": 0,
+            "endBalanceDollars": 5279,
+            "endBalanceCents": 53,
+            "vendor": "Price Chopper"
+        },
+        {
+            "transactionID": 39,
+            "timeMonth": 1,
+            "timeDay": 2,
+            "timeYear": 2020,
+            "amountDollars": -7,
+            "amountCents": 99,
+            "endBalanceDollars": 5335,
+            "endBalanceCents": 53,
+            "vendor": "Netflix"
+        },
+        {
+            "transactionID": 38,
+            "timeMonth": 1,
+            "timeDay": 1,
+            "timeYear": 2020,
+            "amountDollars": -185,
+            "amountCents": 0,
+            "endBalanceDollars": 5343,
+            "endBalanceCents": 52,
+            "vendor": "Google Fiber"
+        },
+        {
+            "transactionID": 37,
+            "timeMonth": 1,
+            "timeDay": 1,
+            "timeYear": 2020,
+            "amountDollars": -130,
+            "amountCents": 0,
+            "endBalanceDollars": 5528,
+            "endBalanceCents": 52,
+            "vendor": "KCPL"
+        },
+        {
+            "transactionID": 36,
+            "timeMonth": 12,
+            "timeDay": 31,
+            "timeYear": 2019,
+            "amountDollars": -45,
+            "amountCents": 0,
+            "endBalanceDollars": 5658,
+            "endBalanceCents": 52,
+            "vendor": "QuikTrip"
+        },
+        {
+            "transactionID": 35,
+            "timeMonth": 12,
+            "timeDay": 25,
+            "timeYear": 2019,
+            "amountDollars": -18,
+            "amountCents": 0,
+            "endBalanceDollars": 5703,
+            "endBalanceCents": 52,
+            "vendor": "Taco Bell"
+        }
+    ]
+}

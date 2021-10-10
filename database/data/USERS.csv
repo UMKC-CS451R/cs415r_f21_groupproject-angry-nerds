@@ -1,0 +1,3 @@
+﻿Email,UserID,FirstName,LastName,Salt,PlaintextPwd
+johndoe@example.com,1,John,Doe,lXgVdxv3aIRRcHOYvgsk,hunter2
+test@mail.fakesite.edu,2,Lauren,Graham,05aapBQgSxHka7RKCMxd,password1
