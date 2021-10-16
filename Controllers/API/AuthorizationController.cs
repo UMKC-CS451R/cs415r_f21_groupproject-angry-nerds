@@ -23,12 +23,25 @@ namespace src.Controllers
         [Route("api/getToken")]
         public IActionResult Authenticate(AuthenticateRequest model)
         {
-            var response = _userService.Authenticate(model);
+            Tuple<AuthenticateResponse, string> auth = _userService.Authenticate(model);
 
-            if (response == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
+            if (auth.Item1 == null || auth.Item2 == null) 
+                return BadRequest(new { message = "Username or password is incorrect" });;
 
-            return Ok(response);
+            CookieOptions option = new CookieOptions
+            {
+                // Set the secure flag, which Chrome's changes will require for SameSite none.
+                // Note this will also require you to be running on HTTPS.
+                Secure = true,
+                // Set the cookie to HTTP only which is good practice unless you really do need
+                // to access it client side in scripts.
+                HttpOnly = true,
+                // Add the SameSite attribute
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.Now.AddMinutes(60)
+            };  
+            Response.Cookies.Append("AuthToken", auth.Item2, option);
+            return Ok(auth.Item1);
         }
 
         [Authorize]
