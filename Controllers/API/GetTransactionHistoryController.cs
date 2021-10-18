@@ -7,53 +7,32 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
+using src.Services;
+using src.Models.API;
 
 namespace src.Controllers.API
 {
+    [Authorize]
     [ApiController]
     public class GetTransactionHistoryController : ControllerBase
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+        private IUserService _userService;
 
-        public GetTransactionHistoryController(IConfiguration configuration, ILogger<GetTransactionHistoryController> logger)
+        public GetTransactionHistoryController(
+            IConfiguration configuration, 
+            ILogger<GetTransactionHistoryController> logger, 
+            IUserService userService)
         {
             _configuration = configuration;
             _logger = logger;
+            _userService = userService;
         }
-
-        private class Transaction
-        {
-            public int TransactionID { get; set; }
-            public int TimeMonth { get; set; }
-            public int TimeDay { get; set; }
-            public int TimeYear { get; set; }
-            public int AmountDollars { get; set; }
-            public int AmountCents { get; set; }
-            public int EndBalanceDollars { get; set; }
-            public int EndBalanceCents { get; set; }
-            public string Vendor { get; set; }
-        }
-
-        private class TransactionHistory
-        {
-            public List<Transaction> Transactions { get; set; }
-            public TransactionHistory()
-            {
-                Transactions = new List<Transaction>();
-            }
-        }
-
-        public class RequestTransactionHistory
-        {
-            public string ID { get; set; }
-            public int PageSize { get; set; }
-            public int PageNumber { get; set; }
-        }
-
+        
         [HttpPost]
         [Route("api/getTransactionHistory")]
-        public async Task<ActionResult> GetAsyncTransactionHistory([FromBody] RequestTransactionHistory body) 
+        public async Task<ActionResult> GetTransactionHistory([FromBody] RequestTransactionHistory body) 
         {
             string connString = this._configuration.GetConnectionString("localDB");
             TransactionHistory history = new TransactionHistory();
@@ -64,7 +43,10 @@ namespace src.Controllers.API
                 using var conn = new MySqlConnection(connString);
 
                 //retrieve the SQL Server instance version
-                string filePath = string.Join(Path.DirectorySeparatorChar, new List<string> { "Controllers", "API", "SQL", "getTransactionHistory.sql" });
+                string filePath = string.Join(
+                    Path.DirectorySeparatorChar, 
+                    new List<string> { "Controllers", "API", "SQL", "getTransactionHistory.sql" }
+                );
                 string query = System.IO.File.ReadAllText(filePath);
 
                 //open connection
