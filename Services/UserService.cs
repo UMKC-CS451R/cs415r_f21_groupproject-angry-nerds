@@ -17,6 +17,7 @@ namespace src.Services
     public interface IUserService
     {
         Tuple<AuthenticateResponse, string> Authenticate(AuthenticateRequest model);
+        string ReAuthenticate(User user);
         IEnumerable<User> GetAll();
         User GetById(int id);
     }
@@ -47,6 +48,12 @@ namespace src.Services
             var token = generateJwtToken(user);
 
             return new Tuple<AuthenticateResponse, string>(new AuthenticateResponse(user), token);
+        }
+
+        public string ReAuthenticate(User user)
+        {
+            // authentication successful so generate jwt token
+            return generateJwtToken(user);
         }
 
         public IEnumerable<User> GetAll()
