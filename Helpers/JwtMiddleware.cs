@@ -65,7 +65,7 @@ namespace src.Helpers
                     HttpOnly = true,
                     // Add the SameSite attribute
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.Now.AddMinutes(60)
+                    Expires = DateTime.Now.AddMinutes(15)
                 };  
                 context.Response.Cookies.Append("AuthToken", userService.ReAuthenticate(user), option);
             }

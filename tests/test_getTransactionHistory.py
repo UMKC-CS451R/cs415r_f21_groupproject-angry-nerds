@@ -16,10 +16,11 @@ def validation_paged():
     with open("tests/resources/getTransactionHistoryPaged.json", "r") as f:
         return json.load(f)
 
-def test_valid(endpoint_url, validation):
+def test_valid(endpoint_url, auth_token, validation):
     response = requests.post(
         endpoint_url, 
         verify=False, 
+        cookies={"AuthToken":auth_token},
         json={
             "ID":"211111110",
             "pageSize":5, 
@@ -29,10 +30,11 @@ def test_valid(endpoint_url, validation):
     assert response.status_code == 200
     assert response.json() == validation    
 
-def test_valid_paged(endpoint_url, validation_paged):
+def test_valid_paged(endpoint_url, auth_token, validation_paged):
     response = requests.post(
         endpoint_url, 
         verify=False, 
+        cookies={"AuthToken":auth_token},
         json={
             "ID":"211111110",
             "pageSize":10, 
@@ -46,10 +48,11 @@ def test_valid_paged(endpoint_url, validation_paged):
     "id, page_size, page_number", 
     [("9", 10, 3), 
     ("211111110", 10, 60)])
-def test_request_error(id, page_size, page_number, endpoint_url):
+def test_request_error(id, page_size, page_number, auth_token, endpoint_url):
     response = requests.post(
         endpoint_url, 
         verify=False, 
+        cookies={"AuthToken":auth_token},
         json={
             "ID":id,
             "pageSize":page_size, 

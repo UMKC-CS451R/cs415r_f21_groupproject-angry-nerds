@@ -38,7 +38,7 @@ namespace src.Controllers
                 HttpOnly = true,
                 // Add the SameSite attribute
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.Now.AddMinutes(60)
+                Expires = DateTime.Now.AddMinutes(15)
             };  
             Response.Cookies.Append("AuthToken", auth.Item2, option);
             return Ok(auth.Item1);
