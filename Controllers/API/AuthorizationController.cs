@@ -22,9 +22,9 @@ namespace src.Controllers
 
         [HttpPost()]
         [Route("api/getToken")]
-        public IActionResult Authenticate(AuthenticateRequest model)
+        public async Task<IActionResult> Authenticate(AuthenticateRequest model)
         {
-            Tuple<AuthenticateResponse, string> auth = _userService.Authenticate(model);
+            Tuple<AuthenticateResponse, string> auth = await _userService.Authenticate(model);
 
             if (auth.Item1 == null || auth.Item2 == null) 
                 return BadRequest(new { message = "Username or password is incorrect" });
@@ -59,8 +59,8 @@ namespace src.Controllers
         [Route("api/getUsers")]
         public IActionResult GetAll()
         {
-            var users = _userService.GetAll();
-            return Ok(users);
+            var user = (User)HttpContext.Items["User"];
+            return Ok(new AuthenticateResponse(user));
         }
     }
 }

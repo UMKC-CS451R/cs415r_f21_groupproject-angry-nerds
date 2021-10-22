@@ -6,7 +6,7 @@ def test_authentication(base_url):
         f"{base_url}/api/getToken",
         verify=False,
         json={
-            "username": "bogus",
+            "email": "bogus",
             "password": "dumbPWD"
         }
     )
@@ -16,11 +16,11 @@ def test_authentication(base_url):
     assert response.json() == {"message": "Username or password is incorrect"}
 
 
-def test_validation(base_url, example_user):
+def test_validation(base_url, user1):
     response = requests.post(
         f"{base_url}/api/getToken",
         verify=False,
-        json=example_user)
+        json={k:v for k,v in user1.items() if k in ["email", "password"]})
     auth_token = response.cookies.get_dict()["AuthToken"]
 
     response = requests.get(
@@ -31,11 +31,11 @@ def test_validation(base_url, example_user):
     assert response.json() == {"message": "Unauthorized"}
 
 
-def test_refresh_token(base_url, example_user):
+def test_refresh_token(base_url, user1):
     response = requests.post(
         f"{base_url}/api/getToken",
         verify=False,
-        json=example_user)
+        json={k:v for k,v in user1.items() if k in ["email", "password"]})
     auth_token = response.cookies.get_dict()["AuthToken"]
 
     sleep(2) # prevent the tokens from being signed within the same second

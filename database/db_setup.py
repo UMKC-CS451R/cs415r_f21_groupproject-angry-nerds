@@ -56,7 +56,7 @@ def main():
         for line in lines:
             elements = [x.strip() for x in line.strip().split(",")]
             elements[1] = int(elements[1])
-            elements[5] = str(hashlib.sha3_256(bytes(''.join([elements[4], elements[5]]), 'utf=8')).digest())
+            elements[5] = hashlib.sha3_256(bytes(''.join([elements[4], elements[5]]), 'utf=8')).digest()
             elements[4] = elements[4].encode('utf-8')
             kwargs = {k:v for k,v in zip(user_fields, elements)}
             with open("database/sql/add_user.sql", "r") as f:

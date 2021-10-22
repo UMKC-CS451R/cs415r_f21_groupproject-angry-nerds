@@ -8,41 +8,98 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using SHA3.Net;
+using MySqlConnector;
 using src.Entities;
 using src.Helpers;
 using src.Models;
+using System.IO;
 
 namespace src.Services
 {
     public interface IUserService
     {
-        Tuple<AuthenticateResponse, string> Authenticate(AuthenticateRequest model);
-        Tuple<User, string> ReAuthenticate(string token);
-        IEnumerable<User> GetAll();
-        User GetById(int id);
+        Task<Tuple<AuthenticateResponse, string>> Authenticate(AuthenticateRequest model);
+        Task<Tuple<User, string>> ReAuthenticate(string token);
+        Task<User> GetById(int id);
     }
 
     public class UserService : IUserService
     {
-        // users hardcoded for simplicity, store in a db with hashed passwords in production applications
-        private List<User> _users = new List<User>
-        {
-            new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
-        };
+        private readonly AppSettingsAccessor _appSettings;
+        private readonly string _connString;
+        private readonly ILogger _logger;
 
-        private readonly AppSettings _appSettings;
-
-        public UserService(IOptions<AppSettings> appSettings)
+        public UserService(ILogger<UserService> logger, IOptions<AppSettingsAccessor> appSettings)
         {
             _appSettings = appSettings.Value;
+            _connString = _appSettings.ConnectionStrings.LocalDB;
+            _logger = logger;
         }
 
-        public Tuple<AuthenticateResponse, string> Authenticate(AuthenticateRequest model)
+        public byte[] HashPassword(string salt, string password) 
         {
-            var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+            return Sha3.Sha3256().ComputeHash(Encoding.UTF8.GetBytes(salt + password));
+        }
 
-            // return null if user not found
+        public async Task<Tuple<AuthenticateResponse, string>> Authenticate(AuthenticateRequest model)
+        {
+            List<User> users = new List<User>();
+            try
+            {
+                //sql connection object
+                using var conn = new MySqlConnection(_connString);
+
+                //retrieve the SQL Server instance version
+                string filePath = string.Join(
+                    Path.DirectorySeparatorChar, 
+                    new List<string> { "Controllers", "API", "SQL", "getUserByEmail.sql" }
+                );
+                string query = System.IO.File.ReadAllText(filePath);
+
+                //open connection
+                await conn.OpenAsync();
+
+                //define the SqlCommand object and execute
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@EMAIL", model.Email);
+
+                // using var cmd = new MySqlCommand(query, conn);
+                using var reader = await cmd.ExecuteReaderAsync();
+                _logger.LogInformation(string.Format("Retrieving User for Email={0} from database.", model.Email));
+
+                //check if there are records
+                while (await reader.ReadAsync())
+                {
+                    byte[] rawSalt = new byte[24];
+                    reader.GetBytes(4, 0, rawSalt, 0, 24);
+                    byte[] rawPwd = new byte[32];
+                    reader.GetBytes(5, 0, rawPwd, 0, 32);
+                    users.Add(new User()
+                    {
+                        Email = reader.GetString(0),
+                        UserId = reader.GetInt32(1),
+                        FirstName = reader.GetString(2),
+                        LastName = reader.GetString(3),
+                        Salt = rawSalt,
+                        Pwd = rawPwd
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return new Tuple<AuthenticateResponse, string>(null, null);
+            }
+            var user = users.FirstOrDefault();
+            // user does not exist: return nulls
             if (user == null) return new Tuple<AuthenticateResponse, string>(null, null);
+
+            // verify the password is correct
+            var hash = HashPassword(Encoding.UTF8.GetString(user.Salt), model.Password);
+            if (!hash.SequenceEqual(user.Pwd)) return new Tuple<AuthenticateResponse, string>(null, null);
 
             // authentication successful so generate jwt token
             var token = generateJwtToken(user);
@@ -50,12 +107,12 @@ namespace src.Services
             return new Tuple<AuthenticateResponse, string>(new AuthenticateResponse(user), token);
         }
 
-        public Tuple<User, string> ReAuthenticate(string token)
+        public async Task<Tuple<User, string>> ReAuthenticate(string token)
         {
             try 
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+                var key = Encoding.ASCII.GetBytes(_appSettings.AppSettings.Secret);
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -69,7 +126,7 @@ namespace src.Services
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
-                var user = GetById(userId);
+                var user = await GetById(userId);
                 if (user == null) return new Tuple<User, string>(null, null);
 
                 // authentication successful so generate jwt token
@@ -82,14 +139,49 @@ namespace src.Services
             }
         }
 
-        public IEnumerable<User> GetAll()
+        public async Task<User> GetById(int id)
         {
-            return _users;
-        }
+            List<User> users = new List<User>();
+            try
+            {
+                //sql connection object
+                using var conn = new MySqlConnection(_connString);
 
-        public User GetById(int id)
-        {
-            return _users.FirstOrDefault(x => x.Id == id);
+                //retrieve the SQL Server instance version
+                string filePath = string.Join(
+                    Path.DirectorySeparatorChar,
+                    new List<string> { "Controllers", "API", "SQL", "getUserById.sql" }
+                );
+                string query = System.IO.File.ReadAllText(filePath);
+
+                //open connection
+                await conn.OpenAsync();
+
+                //define the SqlCommand object and execute
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", id);
+
+                // using var cmd = new MySqlCommand(query, conn);
+                using var reader = await cmd.ExecuteReaderAsync();
+                _logger.LogInformation(string.Format("Retrieving User for UserID={0} from database.", id));
+
+                //check if there are records
+                while (await reader.ReadAsync())
+                {
+                    users.Add(new User()
+                    {
+                        Email = reader.GetString(0),
+                        UserId = reader.GetInt32(1),
+                        FirstName = reader.GetString(2),
+                        LastName = reader.GetString(3)
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+            }
+            return users.FirstOrDefault();
         }
 
         // helper methods
@@ -98,10 +190,10 @@ namespace src.Services
         {
             // generate token that is valid for one hour
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var key = Encoding.ASCII.GetBytes(_appSettings.AppSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
+                Subject = new ClaimsIdentity(new[] { new Claim("id", user.UserId.ToString()) }),
                 Expires = DateTime.UtcNow.AddHours(1.0),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

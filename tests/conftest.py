@@ -1,3 +1,4 @@
+import json
 import pytest
 import requests
 import subprocess
@@ -16,14 +17,20 @@ def base_url():
     return "https://localhost:44347"
 
 @pytest.fixture()
-def example_user():
-    return {"username": "test", "password": "test"}
+def user1():
+    with open("tests/resources/testUser1.json", "r") as f:
+        return json.load(f)
 
 @pytest.fixture()
-def auth_token(base_url, example_user):
+def user2():
+    with open("tests/resources/testUser2.json", "r") as f:
+        return json.load(f)
+
+@pytest.fixture()
+def auth_token(base_url, user1):
     response = requests.post(
         f"{base_url}/api/getToken",
         verify=False,
-        json=example_user)
+        json={k:v for k,v in user1.items() if k in ["email", "password"]})
     token = response.cookies.get_dict()["AuthToken"]
     return token

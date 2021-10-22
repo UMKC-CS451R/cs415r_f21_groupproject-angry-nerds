@@ -14,9 +14,9 @@ namespace src.Helpers
     public class JwtMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly AppSettings _appSettings;
+        private readonly AppSettingsAccessor _appSettings;
 
-        public JwtMiddleware(RequestDelegate next, IOptions<AppSettings> appSettings)
+        public JwtMiddleware(RequestDelegate next, IOptions<AppSettingsAccessor> appSettings)
         {
             _next = next;
             _appSettings = appSettings.Value;
@@ -27,16 +27,16 @@ namespace src.Helpers
             var token = context.Request.Cookies["AuthToken"];
 
             if (token != null)
-                attachUserToContext(context, userService, token);
+                await attachUserToContext(context, userService, token);
 
             await _next(context);
         }
 
-        private void attachUserToContext(HttpContext context, IUserService userService, string token)
+        private async Task attachUserToContext(HttpContext context, IUserService userService, string token)
         {
             try
             {
-                Tuple<User, string> userValidation = userService.ReAuthenticate(token);
+                Tuple<User, string> userValidation = await userService.ReAuthenticate(token);
                 if (userValidation.Item1 == null || userValidation.Item2 == null) return;
 
                 context.Items["User"] = userValidation.Item1;

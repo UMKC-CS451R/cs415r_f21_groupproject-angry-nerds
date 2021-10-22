@@ -29,7 +29,7 @@ namespace CS451RWebApp
             services.AddControllersWithViews();
 
             // configure strongly typed settings object
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            services.Configure<AppSettingsAccessor>(Configuration);
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
