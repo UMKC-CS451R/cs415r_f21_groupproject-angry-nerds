@@ -15,34 +15,27 @@ namespace src.Controllers.API
 {
     [Authorize]
     [ApiController]
-    public class GetTransactionHistoryController : ControllerBase
+    public class GetTransactionController : Controller
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
         private IUserService _userService;
 
-        public GetTransactionHistoryController(
-            IConfiguration configuration, 
-            ILogger<GetTransactionHistoryController> logger, 
+        public GetTransactionController(
+            IConfiguration configuration,
+            ILogger<GetTransactionHistoryController> logger,
             IUserService userService)
         {
             _configuration = configuration;
             _logger = logger;
             _userService = userService;
         }
-
         [HttpPost]
-        [Route("api/getTransactionHistory")]
-        public async Task<ActionResult> GetTransactionHistory([FromBody] RequestTransactionHistory body) 
+        [Route("api/getTransaction")]
+        public async Task<ActionResult> GetTransaction([FromBody] RequestTransaction body)
         {
-            User user = (User)HttpContext.Items["User"];
-            if (!(await _userService.VerifyAccount(user, body.AccountId)))
-            {
-                return Unauthorized();
-            }
-
             string connString = this._configuration.GetConnectionString("localDB");
-            TransactionHistory history = new TransactionHistory();
+            List<TransactionInfo> transactions = new List<TransactionInfo>();
 
             try
             {
@@ -51,8 +44,8 @@ namespace src.Controllers.API
 
                 //retrieve the SQL Server instance version
                 string filePath = string.Join(
-                    Path.DirectorySeparatorChar, 
-                    new List<string> { "Controllers", "API", "SQL", "getTransactionHistory.sql" }
+                    Path.DirectorySeparatorChar,
+                    new List<string> { "Controllers", "API", "SQL", "getTransaction.sql" }
                 );
                 string query = System.IO.File.ReadAllText(filePath);
 
@@ -61,29 +54,30 @@ namespace src.Controllers.API
 
                 //define the SqlCommand object and execute
                 using var cmd = new MySqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@ID", body.AccountId);
-                cmd.Parameters.AddWithValue("@START_ROW", body.PageSize * body.PageNumber);
-                cmd.Parameters.AddWithValue("@NUM_ROWS", body.PageSize);
+                cmd.Parameters.AddWithValue("@ID", body.TransactionId);
 
                 // using var cmd = new MySqlCommand(query, conn);
                 using var reader = await cmd.ExecuteReaderAsync();
-                _logger.LogInformation(string.Format("Retrieving TransactionHistory for AccountID={0} from database.", body.AccountId));
+                _logger.LogInformation(string.Format("Retrieving Transaction for TransactionId={0} from database.", body.TransactionId));
 
                 //check if there are records
                 while (await reader.ReadAsync())
                 {
 
-                    history.Transactions.Add(new Transaction()
+                    transactions.Add(new TransactionInfo()
                     {
-                        TransactionID = reader.GetInt32(0),
-                        TimeMonth = reader.GetInt32(1),
-                        TimeDay = reader.GetInt32(2),
-                        TimeYear = reader.GetInt32(3),
-                        AmountDollars = reader.GetInt32(4),
-                        AmountCents = reader.GetInt32(5),
-                        EndBalanceDollars = reader.GetInt32(6),
-                        EndBalanceCents = reader.GetInt32(7),
-                        Vendor = reader.GetString(8),
+                        TransactionId = reader.GetInt32(0),
+                        AccountId = reader.GetInt32(1),
+                        TimeMonth = reader.GetInt32(2),
+                        TimeDay = reader.GetInt32(3),
+                        TimeYear = reader.GetInt32(4),
+                        AmountDollars = reader.GetInt32(5),
+                        AmountCents = reader.GetInt32(6),
+                        EndBalanceDollars = reader.GetInt32(7),
+                        EndBalanceCents = reader.GetInt32(8),
+                        LocationStCd = reader.GetString(9),
+                        CountryCd = reader.GetString(10),
+                        Vendor = reader.GetString(11)
                     });
                 }
             }
@@ -94,14 +88,24 @@ namespace src.Controllers.API
                 return Problem("Error accessing database, contact site admin for more info");
             }
 
-            if (Helpers.IsEmpty(history.Transactions))
+            TransactionInfo transaction = transactions.SingleOrDefault();
+
+            // if the transaction does not exist, simply say that
+            if (transaction == null)
             {
                 // Account does not exist (StatusCode: 204)
                 return NoContent();
             }
 
+            // verify user can see this transaction
+            User user = (User)HttpContext.Items["User"];
+            if (!(await _userService.VerifyAccount(user, transaction.AccountId)))
+            {
+                return Unauthorized();
+            }
+
             // StatusCode: 200
-            return Ok(history);
+            return Ok(transaction);
         }
     }
 }
