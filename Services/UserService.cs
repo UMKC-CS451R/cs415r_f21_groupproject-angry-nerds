@@ -17,7 +17,7 @@ namespace src.Services
     public interface IUserService
     {
         Tuple<AuthenticateResponse, string> Authenticate(AuthenticateRequest model);
-        string ReAuthenticate(User user);
+        Tuple<User, string> ReAuthenticate(string token);
         IEnumerable<User> GetAll();
         User GetById(int id);
     }
@@ -50,10 +50,36 @@ namespace src.Services
             return new Tuple<AuthenticateResponse, string>(new AuthenticateResponse(user), token);
         }
 
-        public string ReAuthenticate(User user)
+        public Tuple<User, string> ReAuthenticate(string token)
         {
-            // authentication successful so generate jwt token
-            return generateJwtToken(user);
+            try 
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+
+                var user = GetById(userId);
+                if (user == null) return new Tuple<User, string>(null, null);
+
+                // authentication successful so generate jwt token
+                return new Tuple<User, string>(user, generateJwtToken(user));
+            }
+            catch 
+            {
+                // JWT verification failed
+                return new Tuple<User, string>(null, null);
+            }
         }
 
         public IEnumerable<User> GetAll()

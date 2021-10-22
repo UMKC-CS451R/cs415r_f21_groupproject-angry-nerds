@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using src.Entities;
 using src.Models;
 using src.Services;
 
@@ -26,7 +27,7 @@ namespace src.Controllers
             Tuple<AuthenticateResponse, string> auth = _userService.Authenticate(model);
 
             if (auth.Item1 == null || auth.Item2 == null) 
-                return BadRequest(new { message = "Username or password is incorrect" });;
+                return BadRequest(new { message = "Username or password is incorrect" });
 
             CookieOptions option = new CookieOptions
             {
@@ -42,6 +43,15 @@ namespace src.Controllers
             };  
             Response.Cookies.Append("AuthToken", auth.Item2, option);
             return Ok(auth.Item1);
+        }
+
+        [Authorize]
+        [HttpGet()]
+        [Route("api/refreshToken")]
+        public IActionResult ReAuthenticate()
+        {
+            var user = (User)HttpContext.Items["User"];
+            return Ok(new AuthenticateResponse(user));
         }
 
         [Authorize]

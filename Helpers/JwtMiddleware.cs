@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using src.Entities;
 using src.Services;
 
 namespace src.Helpers
@@ -35,26 +36,12 @@ namespace src.Helpers
         {
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
+                Tuple<User, string> userValidation = userService.ReAuthenticate(token);
+                if (userValidation.Item1 == null || userValidation.Item2 == null) return;
 
-                var jwtToken = (JwtSecurityToken)validatedToken;
-                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                context.Items["User"] = userValidation.Item1;
 
-                // attach user to context on successful jwt validation
-                var user = userService.GetById(userId);
-                context.Items["User"] = user;
-
-                // update authenication cookie
+                // update authentication cookie
                 CookieOptions option = new CookieOptions
                 {
                     // Set the secure flag, which Chrome's changes will require for SameSite none.
@@ -67,7 +54,7 @@ namespace src.Helpers
                     SameSite = SameSiteMode.Strict,
                     Expires = DateTime.Now.AddMinutes(15)
                 };  
-                context.Response.Cookies.Append("AuthToken", userService.ReAuthenticate(user), option);
+                context.Response.Cookies.Append("AuthToken", userValidation.Item2, option);
             }
             catch
             {

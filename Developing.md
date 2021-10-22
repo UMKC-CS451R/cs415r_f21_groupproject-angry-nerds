@@ -32,6 +32,9 @@ This guide uses venv, which is now a standard package of python. Any method work
 The file `appsettings.Development.json` should be added to the project root. It should look like this:
 ```
 {
+  "AppSettings": {
+    "Secret": "THIS IS USED TO SIGN AND VERIFY JWT TOKENS< REPLACE IT WITH YOUR OWN SECRET< IT CAN BE ANY STRING"
+  },
   "Logging": {
     "LogLevel": {
       "Default": "Information",
