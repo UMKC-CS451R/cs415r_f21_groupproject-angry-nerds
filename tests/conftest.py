@@ -27,10 +27,19 @@ def user2():
         return json.load(f)
 
 @pytest.fixture()
-def auth_token(base_url, user1):
+def auth_token1(base_url, user1):
     response = requests.post(
         f"{base_url}/api/getToken",
         verify=False,
         json={k:v for k,v in user1.items() if k in ["email", "password"]})
+    token = response.cookies.get_dict()["AuthToken"]
+    return token
+
+@pytest.fixture()
+def auth_token2(base_url, user2):
+    response = requests.post(
+        f"{base_url}/api/getToken",
+        verify=False,
+        json={k:v for k,v in user2.items() if k in ["email", "password"]})
     token = response.cookies.get_dict()["AuthToken"]
     return token

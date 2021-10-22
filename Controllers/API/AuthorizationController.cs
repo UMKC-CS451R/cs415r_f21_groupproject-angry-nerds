@@ -53,14 +53,5 @@ namespace src.Controllers
             var user = (User)HttpContext.Items["User"];
             return Ok(new AuthenticateResponse(user));
         }
-
-        [Authorize]
-        [HttpGet]
-        [Route("api/getUsers")]
-        public IActionResult GetAll()
-        {
-            var user = (User)HttpContext.Items["User"];
-            return Ok(new AuthenticateResponse(user));
-        }
     }
 }

@@ -13,7 +13,15 @@ public class AuthorizeAttribute : Attribute, IAuthorizationFilter
         if (user == null)
         {
             // not logged in
-            context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+            string route = context.HttpContext.Request.Path;
+            if (route.Contains("api", StringComparison.OrdinalIgnoreCase))
+            {
+                context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+            else
+            {
+                context.Result = new RedirectToActionResult("Login", "Home", null);
+            }
         }
     }
 }

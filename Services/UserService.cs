@@ -1,21 +1,22 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+
 using SHA3.Net;
 using MySqlConnector;
+
 using src.Entities;
 using src.Helpers;
 using src.Models;
-using System.IO;
+using src.Models.API;
 
 namespace src.Services
 {
@@ -24,6 +25,7 @@ namespace src.Services
         Task<Tuple<AuthenticateResponse, string>> Authenticate(AuthenticateRequest model);
         Task<Tuple<User, string>> ReAuthenticate(string token);
         Task<User> GetById(int id);
+        Task<bool> VerifyAccount(User user, int accountId);
     }
 
     public class UserService : IUserService
@@ -182,6 +184,51 @@ namespace src.Services
                 _logger.LogError(e.Message);
             }
             return users.FirstOrDefault();
+        }
+
+        public async Task<bool> VerifyAccount(User user, int accountId)
+        {
+            List<Account> accounts = new List<Account>();
+            try
+            {
+                //sql connection object
+                using var conn = new MySqlConnection(_connString);
+
+                //retrieve the SQL Server instance version
+                string filePath = string.Join(
+                    Path.DirectorySeparatorChar,
+                    new List<string> { "Controllers", "API", "SQL", "getUserAccounts.sql" }
+                );
+                string query = System.IO.File.ReadAllText(filePath);
+
+                //open connection
+                await conn.OpenAsync();
+
+                //define the SqlCommand object and execute
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", user.UserId);
+
+                // using var cmd = new MySqlCommand(query, conn);
+                using var reader = await cmd.ExecuteReaderAsync();
+                _logger.LogInformation(string.Format("Retrieving Accounts for UserID={0} from database.", user.UserId));
+
+                //check if there are records
+                while (await reader.ReadAsync())
+                {
+                    accounts.Add(new Account()
+                    {
+                        AccountID = reader.GetInt32(0),
+                        TypeDescription = reader.GetString(1),
+                        EndBalanceDollars = reader.GetInt32(2),
+                        EndBalanceCents = reader.GetInt32(3)
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+            }
+            return accounts.SingleOrDefault(x => x.AccountID == accountId) != null;
         }
 
         // helper methods
