@@ -36,28 +36,27 @@ class SignIn extends React.Component {
       handleSubmit(e) {
         console.log(e);
         e.preventDefault();
-        this.updateFromDB();
+        this.callAPI();
       }
     
       formValidation() {
         return this.state.password.length > 0 && this.state.email.length > 0;
       }
 
-
-      updateFromDB(){
+      callAPI(){
         let API = "https://localhost:44347/api/";
-        let query = "getTransactionHistory";
+        let query = "getToken";
         fetch(API + query, {
             method: 'POST',
             mode: 'cors',
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({"ID": "211111110", "pageSize": 5, "pageNumber": 0})
+            body: JSON.stringify({"email": this.state.email, "password": this.state.password})
         })
         .then(response => response.json())
         .then(data => this.setState({ hits: data.hits }));
-      }
+      };
 
 render() {
     
@@ -82,7 +81,7 @@ render() {
         </>
       );
     }
-};
+}
 /*
 start a function to handle login
 

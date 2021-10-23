@@ -9,7 +9,7 @@ import json
 
 def main():
     # SET ENVIRONMENT VARIABLES FOR DB
-    with open("appsettings.Development.json", "r") as f:
+    with open("Backend/appsettings.Development.json", "r") as f:
         config = json.load(f)
     conn_str = config["ConnectionStrings"]["localDB"]
     conn_elements = {item[0]: item[1] for item in [line.split("=") for line in conn_str.split(";")] if item != ['']}
@@ -23,7 +23,7 @@ def main():
     # create SQL engine for DB
     engine = sql.create_engine(f'mysql+mysqlconnector://{dbuser}:{pwd}@{host}:{port}')
 
-    with open('database/sql/delete_db.sql', mode='r') as f:
+    with open("DB/sql/delete_db.sql", mode='r') as f:
         f_text = f.read()
     query = text(f_text)
     try:

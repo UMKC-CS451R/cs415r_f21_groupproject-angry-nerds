@@ -57,7 +57,7 @@ namespace Backend.Services
                 //retrieve the SQL Server instance version
                 string filePath = string.Join(
                     Path.DirectorySeparatorChar, 
-                    new List<string> { "Controllers", "API", "SQL", "getUserByEmail.sql" }
+                    new List<string> { "SQL", "getUserByEmail.sql" }
                 );
                 string query = System.IO.File.ReadAllText(filePath);
 
