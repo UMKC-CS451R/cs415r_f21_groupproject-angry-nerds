@@ -92,7 +92,7 @@ _[Ss]cripts
 *.ncrunchsolution
 *.dot[Cc]over
 
-/node_modules
+**/node_modules
 /.pnp
 .pnp.js
 
