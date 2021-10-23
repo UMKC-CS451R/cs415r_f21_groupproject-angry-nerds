@@ -1,0 +1,59 @@
+{
+    "transactions": [
+        {
+            "transactionID": 74,
+            "timeMonth": 1,
+            "timeDay": 30,
+            "timeYear": 2020,
+            "amountDollars": -8,
+            "amountCents": 0,
+            "endBalanceDollars": 4571,
+            "endBalanceCents": 8,
+            "vendor": "Starbucks"
+        },
+        {
+            "transactionID": 73,
+            "timeMonth": 1,
+            "timeDay": 30,
+            "timeYear": 2020,
+            "amountDollars": -46,
+            "amountCents": 0,
+            "endBalanceDollars": 4579,
+            "endBalanceCents": 8,
+            "vendor": "Cheesecake Factory"
+        },
+        {
+            "transactionID": 72,
+            "timeMonth": 1,
+            "timeDay": 29,
+            "timeYear": 2020,
+            "amountDollars": -180,
+            "amountCents": 0,
+            "endBalanceDollars": 4625,
+            "endBalanceCents": 8,
+            "vendor": "Pottery Barn"
+        },
+        {
+            "transactionID": 71,
+            "timeMonth": 1,
+            "timeDay": 28,
+            "timeYear": 2020,
+            "amountDollars": 810,
+            "amountCents": 0,
+            "endBalanceDollars": 4805,
+            "endBalanceCents": 8,
+            "vendor": "Payroll"
+        },
+        {
+            "transactionID": 70,
+            "timeMonth": 1,
+            "timeDay": 27,
+            "timeYear": 2020,
+            "amountDollars": -22,
+            "amountCents": 0,
+            "endBalanceDollars": 3995,
+            "endBalanceCents": 8,
+            "vendor": "CVS"
+        }
+    ]
+}
