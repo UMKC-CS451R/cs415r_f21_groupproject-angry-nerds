@@ -30,6 +30,7 @@ bin/
 obj/
 TestResults/
 **/.ipynb_checkpoints/**
+**/build/**
 
 ####################
 # Fun Python Stuff #
