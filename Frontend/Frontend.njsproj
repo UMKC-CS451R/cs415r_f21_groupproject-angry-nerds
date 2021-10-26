@@ -14,8 +14,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>d945a99c-2e10-459b-a3e7-ebddc1a9dffb</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>
-    </StartupFile>
+    <StartupFile>server.js</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -40,6 +39,9 @@
     <Content Include="public\robots.txt" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="server.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="src\App.css" />
     <Content Include="src\App.js" />
     <Content Include="src\App.test.js" />

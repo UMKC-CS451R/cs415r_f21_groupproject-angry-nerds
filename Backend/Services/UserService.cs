@@ -22,7 +22,7 @@ namespace Backend.Services
 {
     public interface IUserService
     {
-        Task<Tuple<AuthenticateResponse, string>> Authenticate(AuthenticateRequest model);
+        Task<AuthenticateResponse> Authenticate(AuthenticateRequest model);
         Task<Tuple<User, string>> ReAuthenticate(string token);
         Task<User> GetById(int id);
         Task<bool> VerifyAccount(User user, int accountId);
@@ -46,7 +46,7 @@ namespace Backend.Services
             return Sha3.Sha3256().ComputeHash(Encoding.UTF8.GetBytes(salt + password));
         }
 
-        public async Task<Tuple<AuthenticateResponse, string>> Authenticate(AuthenticateRequest model)
+        public async Task<AuthenticateResponse> Authenticate(AuthenticateRequest model)
         {
             List<User> users = new List<User>();
             try
@@ -93,20 +93,20 @@ namespace Backend.Services
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
-                return new Tuple<AuthenticateResponse, string>(null, null);
+                return null;
             }
             var user = users.FirstOrDefault();
             // user does not exist: return nulls
-            if (user == null) return new Tuple<AuthenticateResponse, string>(null, null);
+            if (user == null) return null;
 
             // verify the password is correct
             var hash = HashPassword(Encoding.UTF8.GetString(user.Salt), model.Password);
-            if (!hash.SequenceEqual(user.Pwd)) return new Tuple<AuthenticateResponse, string>(null, null);
+            if (!hash.SequenceEqual(user.Pwd)) return null;
 
             // authentication successful so generate jwt token
             var token = generateJwtToken(user);
 
-            return new Tuple<AuthenticateResponse, string>(new AuthenticateResponse(user), token);
+            return new AuthenticateResponse(user) { Token = token };
         }
 
         public async Task<Tuple<User, string>> ReAuthenticate(string token)
@@ -152,7 +152,7 @@ namespace Backend.Services
                 //retrieve the SQL Server instance version
                 string filePath = string.Join(
                     Path.DirectorySeparatorChar,
-                    new List<string> { "Controllers", "API", "SQL", "getUserById.sql" }
+                    new List<string> { "SQL", "getUserById.sql" }
                 );
                 string query = System.IO.File.ReadAllText(filePath);
 
@@ -197,7 +197,7 @@ namespace Backend.Services
                 //retrieve the SQL Server instance version
                 string filePath = string.Join(
                     Path.DirectorySeparatorChar,
-                    new List<string> { "Controllers", "API", "SQL", "getUserAccounts.sql" }
+                    new List<string> { "SQL", "getUserAccounts.sql" }
                 );
                 string query = System.IO.File.ReadAllText(filePath);
 

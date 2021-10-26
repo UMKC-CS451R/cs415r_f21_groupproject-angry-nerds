@@ -1,4 +1,5 @@
 import React from 'react';
+import { Redirect } from 'react-router';
 import {
   Container,
   FormWrap,
@@ -18,6 +19,7 @@ class SignIn extends React.Component {
         super(props);
     
         this.state = {
+            redirect: null,
             email: "",
             password: "",
             hits: [],
@@ -46,6 +48,7 @@ class SignIn extends React.Component {
       callAPI(){
         let API = "https://localhost:44347/api/";
         let query = "getToken";
+        console.log("Starting fetch");
         fetch(API + query, {
             method: 'POST',
             mode: 'cors',
@@ -54,12 +57,39 @@ class SignIn extends React.Component {
             },
             body: JSON.stringify({"email": this.state.email, "password": this.state.password})
         })
+        .then(response => {
+          if (response.ok) {
+            window.localStorage.setItem("user", JSON.stringify(response.json()));
+            this.setState({redirect: "/"});
+          }
+          else {
+            alert("Hello");
+          }})
+        //.then(json => console.log(json))
+        // .then(json => );
+        // console.log(this.state.hits);
+      }
+
+      getTransaction() {
+        let API = "https://localhost:44347/api/";
+        let query = "getTransaction";
+        fetch(API + query, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("user"))["token"]
+            },
+            body: JSON.stringify({"TransactionID": 1})
+        })
         .then(response => response.json())
-        .then(data => this.setState({ hits: data.hits }));
+        .then(json => console.log(json));
       };
 
 render() {
-    
+    if (this.state.redirect) {
+      return <Redirect to={this.state.redirect} />
+    }
     return (
         <>
           <Container>
@@ -73,7 +103,7 @@ render() {
                   <FormLabel htmlFor='password'>Password</FormLabel>
                   <FormInput name="password" value={this.state.password} onChange= {this.handleChange} type='password' placeholder="Enter Password" required />
                   <FormButton type='submit'>Continue</FormButton>
-                  <Text>Forgot password</Text>
+                  <Text onClick={this.getTransaction}>Forgot password</Text>
                 </Form>
               </FormContent>
             </FormWrap>
