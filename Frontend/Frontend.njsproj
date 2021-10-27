@@ -63,6 +63,7 @@
     <Content Include="src\components\Navbar\log.png" />
     <Content Include="src\components\Navbar\logo.jpg" />
     <Content Include="src\components\Navbar\NavbarElements.js" />
+    <Content Include="src\components\profile.js" />
     <Content Include="src\components\ScrollToTop.js" />
     <Content Include="src\components\Services\index.js" />
     <Content Include="src\components\Services\ServicesElements.js" />

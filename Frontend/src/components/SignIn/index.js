@@ -51,7 +51,7 @@ class SignIn extends React.Component {
         console.log("Starting fetch");
         fetch(API + query, {
             method: 'POST',
-            mode: 'cors',
+            mode: 'cors', 
             headers: {
                 "Content-Type": "application/json"
             },
