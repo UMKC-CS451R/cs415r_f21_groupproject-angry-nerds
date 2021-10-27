@@ -78,6 +78,14 @@ export const FormH1 = styled.h1`
   text-align: center;
 `;
 
+export const FormH2 = styled.h2`
+  margin: 20px 0px 20px 0px;
+  color: #ff0000;
+  font-size: 20px;
+  font-weight: 400;
+  text-align: center;
+`;
+
 export const FormLabel = styled.label`
   margin-bottom: 8px;
   font-size: 14px;

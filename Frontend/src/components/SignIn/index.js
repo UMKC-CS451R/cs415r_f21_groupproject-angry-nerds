@@ -7,6 +7,7 @@ import {
   FormContent,
   Form,
   FormH1,
+  FormH2,
   FormLabel,
   FormInput,
   FormButton,
@@ -20,6 +21,7 @@ class SignIn extends React.Component {
     
         this.state = {
             redirect: null,
+            message: "",
             email: "",
             password: "",
             hits: [],
@@ -45,10 +47,31 @@ class SignIn extends React.Component {
         return this.state.password.length > 0 && this.state.email.length > 0;
       }
 
+      handleResponse(data) {
+          var code = Promise.resolve(data["statusCode"]);
+          var json = async() => { await data["json"] };
+          console.log(code.value);
+          console.log(json["message"]);
+          if (code === 200) {
+            // var json = response.json();
+            window.localStorage.setItem("user", JSON.stringify(data["json"]));
+            // console.log(temp);
+            // window.localStorage.setItem("user", JSON.stringify(temp));
+            // this.setState({redirect: "/"});
+          }
+          else if (code === 400) {
+            console.log("hi");
+            console.log(data["json"].message);
+            this.setState({message: data["json"]["message"]});
+          }
+          else {
+            this.setState({message: "Server Error"});
+          }
+      }
+
       callAPI(){
         let API = "https://localhost:44347/api/";
         let query = "getToken";
-        console.log("Starting fetch");
         fetch(API + query, {
             method: 'POST',
             mode: 'cors', 
@@ -59,13 +82,14 @@ class SignIn extends React.Component {
         })
         .then(response => {
           if (response.ok) {
-            window.localStorage.setItem("user", JSON.stringify(response.json()));
+            response.json().then(json => 
+              window.localStorage.setItem("user", JSON.stringify(json)));
             this.setState({redirect: "/"});
           }
           else {
-            alert("Hello");
-          }})
-        //.then(json => console.log(json))
+            response.json().then(json => this.setState({message: json["message"]}));
+          }
+        })
         // .then(json => );
         // console.log(this.state.hits);
       }
@@ -103,6 +127,7 @@ render() {
                   <FormLabel htmlFor='password'>Password</FormLabel>
                   <FormInput name="password" value={this.state.password} onChange= {this.handleChange} type='password' placeholder="Enter Password" required />
                   <FormButton type='submit'>Continue</FormButton>
+                  <FormH2>{this.state.message}</FormH2>
                   <Text onClick={this.getTransaction}>Forgot password</Text>
                 </Form>
               </FormContent>
