@@ -1,3 +1,4 @@
+
 export const homeObjOne = {
     id: 'about',
     lightBg: false,
@@ -9,8 +10,8 @@ export const homeObjOne = {
       'Get access to our exclusive app that allows you to send unlimited transactions without getting charged any fees',
     buttonLabel: 'Get Started',
     imgStart: false,
-    img: require('../../images/unlimited.png'),
-    alt: 'Car',
+    img: '../../images/unlimited.png',
+    alt: 'Weird',
     dark: true,
     primary: true,
     darkText: false
@@ -27,8 +28,8 @@ export const homeObjOne = {
       'We have you covered no matter where you are located. All you need is an internet connection and a phone or computer.',
     buttonLabel: 'Learn More',
     imgStart: true,
-    img: require('../../images/svg-2.svg'),
-    alt: 'Piggybank',
+    img: '../../images/login.jpg',
+    alt: 'bank',
     dark: false,
     primary: false,
     darkText: true
@@ -45,7 +46,7 @@ export const homeObjOne = {
       "Add some cool statments here",
     buttonLabel: 'Start Now',
     imgStart: false,
-    img: require('../../images/svg-3.svg'),
+    img: '../../images/create.jpg',
     alt: 'Papers',
     dark: false,
     primary: false,
