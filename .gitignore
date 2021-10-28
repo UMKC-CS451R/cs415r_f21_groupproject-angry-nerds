@@ -30,6 +30,7 @@ bin/
 obj/
 TestResults/
 **/.ipynb_checkpoints/**
+**/build/**
 
 ####################
 # Fun Python Stuff #
@@ -92,7 +93,7 @@ _[Ss]cripts
 *.ncrunchsolution
 *.dot[Cc]over
 
-/node_modules
+**/node_modules
 /.pnp
 .pnp.js
 

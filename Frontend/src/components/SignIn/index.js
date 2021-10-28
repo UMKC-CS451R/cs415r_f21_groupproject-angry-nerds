@@ -1,4 +1,5 @@
 import React from 'react';
+import { Redirect } from 'react-router';
 import {
   Container,
   FormWrap,
@@ -6,6 +7,7 @@ import {
   FormContent,
   Form,
   FormH1,
+  FormH2,
   FormLabel,
   FormInput,
   FormButton,
@@ -18,6 +20,8 @@ class SignIn extends React.Component {
         super(props);
     
         this.state = {
+            redirect: null,
+            message: "",
             email: "",
             password: "",
             hits: [],
@@ -36,31 +40,80 @@ class SignIn extends React.Component {
       handleSubmit(e) {
         console.log(e);
         e.preventDefault();
-        this.updateFromDB();
+        this.callAPI();
       }
     
       formValidation() {
         return this.state.password.length > 0 && this.state.email.length > 0;
       }
 
+      handleResponse(data) {
+          var code = Promise.resolve(data["statusCode"]);
+          var json = async() => { await data["json"] };
+          console.log(code.value);
+          console.log(json["message"]);
+          if (code === 200) {
+            // var json = response.json();
+            window.localStorage.setItem("user", JSON.stringify(data["json"]));
+            // console.log(temp);
+            // window.localStorage.setItem("user", JSON.stringify(temp));
+            // this.setState({redirect: "/"});
+          }
+          else if (code === 400) {
+            console.log("hi");
+            console.log(data["json"].message);
+            this.setState({message: data["json"]["message"]});
+          }
+          else {
+            this.setState({message: "Server Error"});
+          }
+      }
 
-      updateFromDB(){
+      callAPI(){
         let API = "https://localhost:44347/api/";
-        let query = "getTransactionHistory";
+        let query = "getToken";
         fetch(API + query, {
             method: 'POST',
             mode: 'cors',
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({"ID": "211111110", "pageSize": 5, "pageNumber": 0})
+            body: JSON.stringify({"email": this.state.email, "password": this.state.password})
         })
-        .then(response => response.json())
-        .then(data => this.setState({ hits: data.hits }));
+        .then(response => {
+          if (response.ok) {
+            response.json().then(json => 
+              window.localStorage.setItem("user", JSON.stringify(json)));
+            this.setState({redirect: "/"});
+          }
+          else {
+            response.json().then(json => this.setState({message: json["message"]}));
+          }
+        })
+        // .then(json => );
+        // console.log(this.state.hits);
       }
 
+      getTransaction() {
+        let API = "https://localhost:44347/api/";
+        let query = "getTransaction";
+        fetch(API + query, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("user"))["token"]
+            },
+            body: JSON.stringify({"TransactionID": 1})
+        })
+        .then(response => response.json())
+        .then(json => console.log(json));
+      };
+
 render() {
-    
+    if (this.state.redirect) {
+      return <Redirect to={this.state.redirect} />
+    }
     return (
         <>
           <Container>
@@ -74,7 +127,8 @@ render() {
                   <FormLabel htmlFor='password'>Password</FormLabel>
                   <FormInput name="password" value={this.state.password} onChange= {this.handleChange} type='password' placeholder="Enter Password" required />
                   <FormButton type='submit'>Continue</FormButton>
-                  <Text>Forgot password</Text>
+                  <FormH2>{this.state.message}</FormH2>
+                  <Text onClick={this.getTransaction}>Forgot password</Text>
                 </Form>
               </FormContent>
             </FormWrap>
@@ -82,7 +136,7 @@ render() {
         </>
       );
     }
-};
+}
 /*
 start a function to handle login
 

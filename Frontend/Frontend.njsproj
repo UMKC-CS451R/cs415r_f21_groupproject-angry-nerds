@@ -5,6 +5,8 @@
     <Name>Frontend</Name>
     <RootNamespace>Frontend</RootNamespace>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
+    <ScriptArguments>
+    </ScriptArguments>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -12,7 +14,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>d945a99c-2e10-459b-a3e7-ebddc1a9dffb</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>src/index.js</StartupFile>
+    <StartupFile>server.js</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -29,9 +31,17 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="server.js" />
+    <Content Include="public\favicon.ico" />
+    <Content Include="public\index.html" />
+    <Content Include="public\logo192.png" />
+    <Content Include="public\logo512.png" />
+    <Content Include="public\manifest.json" />
+    <Content Include="public\robots.txt" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="server.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="src\App.css" />
     <Content Include="src\App.js" />
     <Content Include="src\App.test.js" />
@@ -75,6 +85,7 @@
     <Content Include="src\videos\video.mp4" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="public\" />
     <Folder Include="src\" />
     <Folder Include="src\components\" />
     <Folder Include="src\components\Footer\" />

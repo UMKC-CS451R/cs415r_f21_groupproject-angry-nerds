@@ -14,16 +14,16 @@ def recreate_db():
 
 @pytest.fixture(scope="session")
 def base_url():
-    return "https://localhost:44347"
+    return "https://localhost:5001"
 
 @pytest.fixture()
 def user1():
-    with open("tests/resources/testUser1.json", "r") as f:
+    with open("Test/resources/testUser1.json", "r") as f:
         return json.load(f)
 
 @pytest.fixture()
 def user2():
-    with open("tests/resources/testUser2.json", "r") as f:
+    with open("Test/resources/testUser2.json", "r") as f:
         return json.load(f)
 
 @pytest.fixture()

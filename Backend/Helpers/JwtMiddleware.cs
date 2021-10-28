@@ -24,7 +24,8 @@ namespace Backend.Helpers
 
         public async Task Invoke(HttpContext context, IUserService userService)
         {
-            var token = context.Request.Cookies["AuthToken"];
+            //var token = context.Request.Cookies["AuthToken"];
+            var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
             if (token != null)
                 await attachUserToContext(context, userService, token);

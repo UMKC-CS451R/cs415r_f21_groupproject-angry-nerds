@@ -8,12 +8,12 @@ def endpoint_url(base_url):
 
 @pytest.fixture()
 def validation():
-    with open("tests/resources/getTransactionHistory.json", "r") as f:
+    with open("Test/resources/getTransactionHistory.json", "r") as f:
         return json.load(f)
 
 @pytest.fixture()
 def validation_paged():
-    with open("tests/resources/getTransactionHistoryPaged.json", "r") as f:
+    with open("Test/resources/getTransactionHistoryPaged.json", "r") as f:
         return json.load(f)
 
 def test_valid(endpoint_url, auth_token1, validation):

@@ -8,12 +8,12 @@ def endpoint_url(base_url):
 
 @pytest.fixture()
 def validation1():
-    with open("tests/resources/getTransaction1.json", "r") as f:
+    with open("Test/resources/getTransaction1.json", "r") as f:
         return json.load(f)
 
 @pytest.fixture()
 def validation2():
-    with open("tests/resources/getTransaction2.json", "r") as f:
+    with open("Test/resources/getTransaction2.json", "r") as f:
         return json.load(f)
 
 def test_valid(endpoint_url, auth_token1, validation1):
