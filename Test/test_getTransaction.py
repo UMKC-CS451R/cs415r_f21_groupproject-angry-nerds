@@ -20,7 +20,7 @@ def test_valid(endpoint_url, auth_token1, validation1):
     response = requests.post(
         endpoint_url, 
         verify=False, 
-        cookies={"AuthToken":auth_token1},
+        headers={"Authorization": f"Bearer {auth_token1}"},
         json={
             "TransactionId":1
         }
@@ -32,7 +32,7 @@ def test_valid(endpoint_url, auth_token2, validation2):
     response = requests.post(
         endpoint_url, 
         verify=False, 
-        cookies={"AuthToken":auth_token2},
+        headers={"Authorization": f"Bearer {auth_token2}"},
         json={
             "TransactionId":117
         }
@@ -47,7 +47,7 @@ def test_request_error_no_content(id, auth_token1, endpoint_url):
     response = requests.post(
         endpoint_url, 
         verify=False, 
-        cookies={"AuthToken":auth_token1},
+        headers={"Authorization": f"Bearer {auth_token1}"},
         json={
             "TransactionId":id
         }
@@ -61,7 +61,7 @@ def test_request_error_unauthorized(id, auth_token1, endpoint_url):
     response = requests.post(
         endpoint_url, 
         verify=False, 
-        cookies={"AuthToken":auth_token1},
+        headers={"Authorization": f"Bearer {auth_token1}"},
         json={
             "TransactionId":id
         }

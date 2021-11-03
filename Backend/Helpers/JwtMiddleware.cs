@@ -41,21 +41,6 @@ namespace Backend.Helpers
                 if (userValidation.Item1 == null || userValidation.Item2 == null) return;
 
                 context.Items["User"] = userValidation.Item1;
-
-                // update authentication cookie
-                CookieOptions option = new CookieOptions
-                {
-                    // Set the secure flag, which Chrome's changes will require for SameSite none.
-                    // Note this will also require you to be running on HTTPS.
-                    Secure = true,
-                    // Set the cookie to HTTP only which is good practice unless you really do need
-                    // to access it client side in scripts.
-                    HttpOnly = true,
-                    // Add the SameSite attribute
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.Now.AddMinutes(15)
-                };  
-                context.Response.Cookies.Append("AuthToken", userValidation.Item2, option);
             }
             catch
             {

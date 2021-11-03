@@ -14,7 +14,7 @@ def recreate_db():
 
 @pytest.fixture(scope="session")
 def base_url():
-    return "https://localhost:5001"
+    return "https://localhost:44347"
 
 @pytest.fixture()
 def user1():
@@ -32,7 +32,7 @@ def auth_token1(base_url, user1):
         f"{base_url}/api/getToken",
         verify=False,
         json={k:v for k,v in user1.items() if k in ["email", "password"]})
-    token = response.cookies.get_dict()["AuthToken"]
+    token = response.json()["token"]
     return token
 
 @pytest.fixture()
@@ -41,5 +41,5 @@ def auth_token2(base_url, user2):
         f"{base_url}/api/getToken",
         verify=False,
         json={k:v for k,v in user2.items() if k in ["email", "password"]})
-    token = response.cookies.get_dict()["AuthToken"]
+    token = response.json()["token"]
     return token

@@ -20,7 +20,7 @@ def test_valid(endpoint_url, auth_token1, validation):
     response = requests.post(
         endpoint_url, 
         verify=False, 
-        cookies={"AuthToken":auth_token1},
+        headers={"Authorization": f"Bearer {auth_token1}"},
         json={
             "AccountId":211111110,
             "pageSize":5, 
@@ -34,7 +34,7 @@ def test_valid_paged(endpoint_url, auth_token1, validation_paged):
     response = requests.post(
         endpoint_url, 
         verify=False, 
-        cookies={"AuthToken":auth_token1},
+        headers={"Authorization": f"Bearer {auth_token1}"},
         json={
             "AccountId":211111110,
             "pageSize":10, 
@@ -51,7 +51,7 @@ def test_request_error_no_content(id, page_size, page_number, auth_token1, endpo
     response = requests.post(
         endpoint_url, 
         verify=False, 
-        cookies={"AuthToken":auth_token1},
+        headers={"Authorization": f"Bearer {auth_token1}"},
         json={
             "AccountId":id,
             "pageSize":page_size, 
@@ -67,7 +67,7 @@ def test_request_error_unauthorized(id, page_size, page_number, auth_token1, end
     response = requests.post(
         endpoint_url, 
         verify=False, 
-        cookies={"AuthToken":auth_token1},
+        headers={"Authorization": f"Bearer {auth_token1}"},
         json={
             "AccountId":id,
             "pageSize":page_size, 
