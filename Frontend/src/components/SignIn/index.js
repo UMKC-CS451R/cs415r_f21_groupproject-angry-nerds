@@ -74,7 +74,7 @@ class SignIn extends React.Component {
         let query = "getToken";
         fetch(API + query, {
             method: 'POST',
-            mode: 'cors',
+            mode: 'cors', 
             headers: {
                 "Content-Type": "application/json"
             },
