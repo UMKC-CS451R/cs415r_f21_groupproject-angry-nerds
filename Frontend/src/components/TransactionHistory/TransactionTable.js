@@ -4,8 +4,8 @@ import {
 } from 'react-table';
 
 const TransactionTable = (props) =>  {
-    const data = useMemo(() => props.data, []);
-    const columns = useMemo(() => props.columns, []);
+    const data = useMemo(() => props.data, [props.data]);
+    const columns = useMemo(() => props.columns, [props.columns]);
     const {
         getTableProps,
         getTableBodyProps,
