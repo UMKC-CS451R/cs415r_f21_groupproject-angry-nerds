@@ -1,5 +1,6 @@
 import React from 'react';
 import { Redirect, withRouter } from 'react-router';
+// import RefreshUser from '../SignIn/RefreshUser';
 import { Columns } from './Columns';
 import TransactionTable from './TransactionTable';
 import './style.css';
@@ -27,9 +28,8 @@ class TransactionHistory extends React.Component {
             }
             else if (this.state.user["accounts"].length - 1 < this.state.id){
                 this.setState({redirect: "./0"}, () => {
-                    this.setState({redirect: null});
+                    this.setState({redirect: null, id:0}, () => this.getTransactions());
                 });
-                this.setState({id:0}, () => this.getTransactions());
             }
             else{
                 this.getTransactions(); 
@@ -44,9 +44,39 @@ class TransactionHistory extends React.Component {
         else if (this.state.user["tokenExpires"] <= Date.now()){
             return false;
         }
-        return true;
+        else {
+            this.refreshUser();      
+            return true;
+        }
     }
     
+    refreshUser() {
+        let API = "https://localhost:44347/api/";
+        let query = "refreshToken";
+        fetch(API + query, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this.state.user["token"]
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                response.json().then(json => {
+                    let newUser = this.state.user;
+                    newUser["token"] = json["token"];
+                    newUser["tokenExpires"] = json["tokenExpires"];
+                    this.setState({user:newUser});
+                    window.localStorage.setItem("user", JSON.stringify(newUser));
+                });
+            }
+            else {
+                return null;
+            }
+        });
+    }
+
     getTransactions() {
         let API = "https://localhost:44347/api/";
         let query = "getTransactionHistory";
@@ -93,6 +123,7 @@ class TransactionHistory extends React.Component {
         const newSize = parseInt(event.target.value);
         this.setState({pageSize:newSize}, () => this.getTransactions());
     }
+
     render() {
         if (this.state.redirect) {
             return <Redirect to={this.state.redirect} />
@@ -104,7 +135,7 @@ class TransactionHistory extends React.Component {
                 </div>
                 <div>
                 <button type="button" onClick={this.decPage} id="left">Previous Page</button>
-                <label for="pageSizeSelector">Page Size:</label>
+                <label htmlFor="pageSizeSelector">Page Size:</label>
                 <select name="pageSizeSelector" id="pageSizeSelector" onChange={this.changePageSize} value={this.state.pageSize}>
                     <option value="30">30</option>
                     <option value="60">60</option>

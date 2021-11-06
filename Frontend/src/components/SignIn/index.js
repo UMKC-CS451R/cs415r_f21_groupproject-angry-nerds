@@ -72,7 +72,7 @@ class SignIn extends React.Component {
             // this.setState({user:JSON.parse(window.localStorage.getItem("user"))});
             // this.getUser();
             // console.log(this.state.user);
-            // this.setState({redirect: "/"});
+            this.setState({redirect: "/"});
           }
           else {
             response.json().then(json => this.setState({message: json["message"]}));
@@ -98,8 +98,6 @@ class SignIn extends React.Component {
             const newUser = {...this.state.user, "accounts": json.accounts};
             window.localStorage.setItem("user", JSON.stringify(newUser));
             this.setState({user:newUser});
-            console.log("line 94");
-            console.log(this.state.user);
         });        
       };  
 
