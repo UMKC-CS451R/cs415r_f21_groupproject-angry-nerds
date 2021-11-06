@@ -18,17 +18,18 @@ class SignIn extends React.Component {
 
     constructor (props) { 
         super(props);
-    
+
         this.state = {
             redirect: null,
             message: "",
             email: "",
             password: "",
-            hits: [],
+            user: {},
         };
     
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        // console.log(props);
       }
     
       handleChange = event => {
@@ -47,28 +48,6 @@ class SignIn extends React.Component {
         return this.state.password.length > 0 && this.state.email.length > 0;
       }
 
-      handleResponse(data) {
-          var code = Promise.resolve(data["statusCode"]);
-          var json = async() => { await data["json"] };
-          console.log(code.value);
-          console.log(json["message"]);
-          if (code === 200) {
-            // var json = response.json();
-            window.localStorage.setItem("user", JSON.stringify(data["json"]));
-            // console.log(temp);
-            // window.localStorage.setItem("user", JSON.stringify(temp));
-            // this.setState({redirect: "/"});
-          }
-          else if (code === 400) {
-            console.log("hi");
-            console.log(data["json"].message);
-            this.setState({message: data["json"]["message"]});
-          }
-          else {
-            this.setState({message: "Server Error"});
-          }
-      }
-
       callAPI(){
         let API = "https://localhost:44347/api/";
         let query = "getToken";
@@ -82,33 +61,47 @@ class SignIn extends React.Component {
         })
         .then(response => {
           if (response.ok) {
-            response.json().then(json => 
-              window.localStorage.setItem("user", JSON.stringify(json)));
-            this.setState({redirect: "/"});
+            response.json().then(json => {
+              this.setState({user: json}, () => {
+                this.getUser()
+              });
+              // console.log(this.state.user);
+              // window.localStorage.setItem("user", JSON.stringify(json));
+            });
+            // window.localStorage.setItem("user", this.state.user);
+            // this.setState({user:JSON.parse(window.localStorage.getItem("user"))});
+            // this.getUser();
+            // console.log(this.state.user);
+            // this.setState({redirect: "/"});
           }
           else {
             response.json().then(json => this.setState({message: json["message"]}));
           }
         })
-        // .then(json => );
-        // console.log(this.state.hits);
       }
 
-      getTransaction() {
+      getUser() {
         let API = "https://localhost:44347/api/";
-        let query = "getTransaction";
+        let query = "getUser";
+        console.log(this.state.user);
         fetch(API + query, {
             method: 'POST',
             mode: 'cors',
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("user"))["token"]
+                "Authorization": "Bearer " + this.state.user["token"]
             },
-            body: JSON.stringify({"TransactionID": 1})
+            body: JSON.stringify({"UserId": this.state.user["userId"]})
         })
         .then(response => response.json())
-        .then(json => console.log(json));
-      };
+        .then(json => {
+            const newUser = {...this.state.user, "accounts": json.accounts};
+            window.localStorage.setItem("user", JSON.stringify(newUser));
+            this.setState({user:newUser});
+            console.log("line 94");
+            console.log(this.state.user);
+        });        
+      };  
 
 render() {
     if (this.state.redirect) {

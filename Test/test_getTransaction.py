@@ -16,7 +16,7 @@ def validation2():
     with open("Test/resources/getTransaction2.json", "r") as f:
         return json.load(f)
 
-def test_valid(endpoint_url, auth_token1, validation1):
+def test_valid1(endpoint_url, auth_token1, validation1):
     response = requests.post(
         endpoint_url, 
         verify=False, 
@@ -28,7 +28,7 @@ def test_valid(endpoint_url, auth_token1, validation1):
     assert response.status_code == 200
     assert response.json() == validation1 
 
-def test_valid(endpoint_url, auth_token2, validation2):
+def test_valid2(endpoint_url, auth_token2, validation2):
     response = requests.post(
         endpoint_url, 
         verify=False, 

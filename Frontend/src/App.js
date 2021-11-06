@@ -10,7 +10,7 @@ function App() {
   return (
     <Router>
       <Switch>
-        <Route path='/customer/account' component={TransactionHistoryPage} exact />
+        <Route path='/customer/account/:id' component={TransactionHistoryPage} exact />
         <Route path='/signin' component={SigninPage} exact />
         <Route path='/' component={Home} exact />
       </Switch>

@@ -37,10 +37,13 @@ namespace Backend.Helpers
         {
             try
             {
-                Tuple<User, string> userValidation = await userService.ReAuthenticate(token);
-                if (userValidation.Item1 == null || userValidation.Item2 == null) return;
+                User userValidation = await userService.VerifyUser(token);
+                if (userValidation == null)
+                {
+                    return;
+                }
 
-                context.Items["User"] = userValidation.Item1;
+                context.Items["User"] = userValidation;
             }
             catch
             {

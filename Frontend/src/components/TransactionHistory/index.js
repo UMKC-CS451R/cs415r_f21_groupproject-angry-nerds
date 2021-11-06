@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { Redirect, withRouter } from 'react-router';
 import { Columns } from './Columns';
 import TransactionTable from './TransactionTable';
 import {
@@ -11,8 +12,10 @@ class TransactionHistory extends React.Component {
         super(props);
 
         this.state = {
+            redirect: null,
             pageSize: 30,
-            pageNumber: 1,
+            pageNumber: 0,
+            user: {},
             transactions: []
         };
 
@@ -21,8 +24,23 @@ class TransactionHistory extends React.Component {
         // this.handleChange = this.handleChange.bind(this);
     }
 
-    componentDidMount() { 
-        this.getTransactions(); 
+    componentDidMount() {
+        const id = this.props.match.params["id"];
+        const localUser = JSON.parse(window.localStorage.getItem("user"));
+        this.setState({user:localUser}, () => {
+            if (!this.verifyLoggedIn()) {
+                this.setState({redirect: "/signin"});
+            }
+            else if (this.state.user["accounts"].length - 1 < id){
+                this.setState({redirect: "./0"}, () => {
+                    this.setState({redirect: null});
+                });
+                this.getTransactions(0);
+            }
+            else{
+                this.getTransactions(id); 
+            }
+        });
     }
     
     //   handleChange = event => {
@@ -31,20 +49,31 @@ class TransactionHistory extends React.Component {
     //     });
     //   }
 
-    getTransactions() {
+    verifyLoggedIn() {
+        if (this.state.user === {}) {
+            return false;
+        }
+        else if (this.state.user["tokenExpires"] <= Date.now()){
+            return false;
+        }
+        return true;
+    }
+    
+    getTransactions(id) {
         let API = "https://localhost:44347/api/";
         let query = "getTransactionHistory";
+        const accountId = this.state.user["accounts"].map(account => account["accountId"]).sort((a,b)=>a-b)[id];
         fetch(API + query, {
             method: 'POST',
             mode: 'cors',
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("user"))["token"]
+                "Authorization": "Bearer " + this.state.user["token"]
             },
             body: JSON.stringify({
-                "accountId":211111110,
-                "pageSize":30, 
-                "pageNumber":0
+                "accountId":accountId,
+                "pageSize":this.state.pageSize, 
+                "pageNumber":this.state.pageNumber
             })
         })
         .then(response => response.json())
@@ -52,6 +81,9 @@ class TransactionHistory extends React.Component {
     };
 
     render() {
+        if (this.state.redirect) {
+            return <Redirect to={this.state.redirect} />
+        }
         return (
             <div>
                 <TransactionTable columns={Columns} data={this.state.transactions} />
@@ -60,4 +92,4 @@ class TransactionHistory extends React.Component {
     }
 }
 
-export default TransactionHistory;
+export default withRouter(TransactionHistory);
