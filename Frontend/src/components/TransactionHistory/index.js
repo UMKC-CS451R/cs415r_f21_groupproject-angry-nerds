@@ -13,6 +13,7 @@ class TransactionHistory extends React.Component {
 
         this.state = {
             redirect: null,
+            id: 0,
             pageSize: 30,
             pageNumber: 0,
             user: {},
@@ -25,29 +26,23 @@ class TransactionHistory extends React.Component {
     }
 
     componentDidMount() {
-        const id = this.props.match.params["id"];
+        const paramId = this.props.match.params["id"];
         const localUser = JSON.parse(window.localStorage.getItem("user"));
-        this.setState({user:localUser}, () => {
+        this.setState({id:paramId, user:localUser}, () => {
             if (!this.verifyLoggedIn()) {
                 this.setState({redirect: "/signin"});
             }
-            else if (this.state.user["accounts"].length - 1 < id){
+            else if (this.state.user["accounts"].length - 1 < this.state.id){
                 this.setState({redirect: "./0"}, () => {
                     this.setState({redirect: null});
                 });
-                this.getTransactions(0);
+                this.setState({id:0}, () => this.getTransactions());
             }
             else{
-                this.getTransactions(id); 
+                this.getTransactions(); 
             }
         });
     }
-    
-    //   handleChange = event => {
-    //     this.setState({
-    //         [event.target.name]: event.target.value
-    //     });
-    //   }
 
     verifyLoggedIn() {
         if (this.state.user === {}) {
@@ -59,10 +54,12 @@ class TransactionHistory extends React.Component {
         return true;
     }
     
-    getTransactions(id) {
+    getTransactions() {
         let API = "https://localhost:44347/api/";
         let query = "getTransactionHistory";
-        const accountId = this.state.user["accounts"].map(account => account["accountId"]).sort((a,b)=>a-b)[id];
+        const accountId = this.state.user["accounts"]
+        .map(account => account["accountId"])
+        .sort((a,b)=>a-b)[this.state.id];
         fetch(API + query, {
             method: 'POST',
             mode: 'cors',
@@ -80,13 +77,32 @@ class TransactionHistory extends React.Component {
         .then(json => this.setState({transactions: json['transactions']}));
     };
 
+    decPage = () => {
+        if(this.state.pageNumber > 0) {
+            const newPage = this.state.pageNumber - 1;
+            this.setState({pageNumber:newPage}, () => this.getTransactions());
+        }
+    }
+
+    incPage = () => {
+        const newPage = this.state.pageNumber + 1;
+        this.setState({pageNumber:newPage}, () => this.getTransactions());
+        console.log(this.state.pageNumber);
+    }
+
     render() {
         if (this.state.redirect) {
             return <Redirect to={this.state.redirect} />
         }
         return (
             <div>
-                <TransactionTable columns={Columns} data={this.state.transactions} />
+                <div>
+                    <TransactionTable columns={Columns} data={this.state.transactions} />
+                </div>
+                <div>
+                <button type="button" onClick={this.decPage} id="left">Previous Page</button>
+                <button type="button" onClick={this.incPage} id="right">Next Page</button>
+                </div>
             </div>
         );
     }
