@@ -2,10 +2,6 @@ import React from 'react';
 import { Redirect, withRouter } from 'react-router';
 import { Columns } from './Columns';
 import TransactionTable from './TransactionTable';
-import {
-  Container,
-  TableWrap
-} from './TransactionElements';
 import './style.css';
 
 class TransactionHistory extends React.Component {
