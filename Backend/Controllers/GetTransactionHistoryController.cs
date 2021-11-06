@@ -97,7 +97,7 @@ namespace Backend.Controllers.API
             if (Helpers.IsEmpty(history.Transactions))
             {
                 // Account does not exist (StatusCode: 204)
-                return NoContent();
+                return NotFound();
             }
 
             // StatusCode: 200

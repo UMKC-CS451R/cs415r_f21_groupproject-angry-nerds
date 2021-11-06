@@ -6,6 +6,7 @@ import {
   Container,
   TableWrap
 } from './TransactionElements';
+import './style.css';
 
 class TransactionHistory extends React.Component {
     constructor (props) { 
@@ -19,10 +20,6 @@ class TransactionHistory extends React.Component {
             user: {},
             transactions: []
         };
-
-        //this.getTransactions();
-
-        // this.handleChange = this.handleChange.bind(this);
     }
 
     componentDidMount() {
@@ -73,8 +70,15 @@ class TransactionHistory extends React.Component {
                 "pageNumber":this.state.pageNumber
             })
         })
-        .then(response => response.json())
-        .then(json => this.setState({transactions: json['transactions']}));
+        .then(response => {
+            if (response.ok) {
+                response.json().then(json => this.setState({transactions: json['transactions']}));
+            }
+            else {
+                const newPage = this.state.pageNumber - 1;
+                this.setState({pageNumber:newPage});
+            }
+        });
     };
 
     decPage = () => {
@@ -87,9 +91,12 @@ class TransactionHistory extends React.Component {
     incPage = () => {
         const newPage = this.state.pageNumber + 1;
         this.setState({pageNumber:newPage}, () => this.getTransactions());
-        console.log(this.state.pageNumber);
     }
 
+    changePageSize = (event) => {
+        const newSize = parseInt(event.target.value);
+        this.setState({pageSize:newSize}, () => this.getTransactions());
+    }
     render() {
         if (this.state.redirect) {
             return <Redirect to={this.state.redirect} />
@@ -101,6 +108,13 @@ class TransactionHistory extends React.Component {
                 </div>
                 <div>
                 <button type="button" onClick={this.decPage} id="left">Previous Page</button>
+                <label for="pageSizeSelector">Page Size:</label>
+                <select name="pageSizeSelector" id="pageSizeSelector" onChange={this.changePageSize} value={this.state.pageSize}>
+                    <option value="30">30</option>
+                    <option value="60">60</option>
+                    <option value="90">90</option>
+                </select>
+                <p>Page Number: {this.state.pageNumber + 1}</p>
                 <button type="button" onClick={this.incPage} id="right">Next Page</button>
                 </div>
             </div>
