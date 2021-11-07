@@ -15,6 +15,12 @@ class TransactionHistory extends React.Component {
             pageSize: 30,
             pageNumber: 0,
             user: {},
+            account: {
+                accountId: 0,
+                endBalanceDollars: 0,
+                endBalanceCents: 0,
+                typeDescription: ""
+            },
             transactions: []
         };
     }
@@ -51,68 +57,15 @@ class TransactionHistory extends React.Component {
                 }
             });
         });
-
-        // this.setState({id:paramId, user:localUser}, () => {
-        //     if (this.state.user["accounts"].length - 1 < this.state.id){
-        //         this.setState({redirect: "./0"}, () => {
-        //             this.setState({redirect: null, id:0}, () => this.getTransactions());
-        //         });
-        //     }
-        //     else{
-        //         this.getTransactions(); 
-        //     }
-        // });
     }
-
-    verifyLoggedIn() {
-        if (this.state.user === {}) {
-            return false;
-        }
-        else if (this.state.user["tokenExpires"] <= Date.now()){
-            return false;
-        }
-        else {
-            const newUser = RefreshUser();   
-            console.log(newUser); 
-            this.setState({user:newUser});
-            window.localStorage.setItem("user", JSON.stringify(newUser));  
-            return true;
-        }
-    }
-    
-    // refreshUser() {
-    //     let API = "https://localhost:44347/api/";
-    //     let query = "refreshToken";
-    //     fetch(API + query, {
-    //         method: 'GET',
-    //         mode: 'cors',
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             "Authorization": "Bearer " + this.state.user["token"]
-    //         }
-    //     })
-    //     .then(response => {
-    //         if (response.ok) {
-    //             response.json().then(json => {
-    //                 let newUser = this.state.user;
-    //                 newUser["token"] = json["token"];
-    //                 newUser["tokenExpires"] = json["tokenExpires"];
-    //                 this.setState({user:newUser});
-    //                 window.localStorage.setItem("user", JSON.stringify(newUser));
-    //             });
-    //         }
-    //         else {
-    //             return null;
-    //         }
-    //     });
-    // }
 
     getTransactions() {
         let API = "https://localhost:44347/api/";
         let query = "getTransactionHistory";
-        const accountId = this.state.user["accounts"]
-        .map(account => account["accountId"])
-        .sort((a,b)=>a-b)[this.state.id];
+        const account = this.state.user["accounts"]
+        .sort((a,b)=>a["accountId"]-b["accountId"])[this.state.id];
+        this.setState({ account });
+        console.log(account);
         fetch(API + query, {
             method: 'POST',
             mode: 'cors',
@@ -121,7 +74,7 @@ class TransactionHistory extends React.Component {
                 "Authorization": "Bearer " + this.state.user["token"]
             },
             body: JSON.stringify({
-                "accountId":accountId,
+                "accountId":account["accountId"],
                 "pageSize":this.state.pageSize, 
                 "pageNumber":this.state.pageNumber
             })
@@ -160,6 +113,7 @@ class TransactionHistory extends React.Component {
         }
         return (
             <div>
+                <h1>{this.state.account["typeDescription"]} Account: {"*".repeat(5) + this.state.account["accountId"].toString().slice(-4)}</h1>
                 <div>
                     <TransactionTable columns={Columns} data={this.state.transactions} />
                 </div>
