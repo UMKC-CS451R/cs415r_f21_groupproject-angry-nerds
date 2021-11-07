@@ -235,9 +235,9 @@ def main():
             elements[3] = int(elements[3])
             elements[4] = int(elements[4])
             elements[5] = int(elements[5])
-            elements[6] = int(elements[6])
+            elements[6] = int(elements[6] if len(elements[6]) == 2 else elements[6] + "0")
             elements[7] = int(elements[7])
-            elements[8] = int(elements[8])
+            elements[8] = int(elements[8] if len(elements[8]) == 2 else elements[8] + "0")
             kwargs = {k:v for k,v in zip(transaction_fields, elements)}
             with open("DB/sql/add_transaction.sql", "r") as f:
                 f_text = f.read()

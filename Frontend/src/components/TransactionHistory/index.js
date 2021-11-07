@@ -81,7 +81,9 @@ class TransactionHistory extends React.Component {
         })
         .then(response => {
             if (response.ok) {
-                response.json().then(json => this.setState({transactions: json['transactions']}));
+                response.json()
+                .then(json => this.beautifyTransactions(json['transactions']))
+                .then(json => this.setState({transactions: json}));
             }
             else {
                 const newPage = this.state.pageNumber - 1;
@@ -89,6 +91,34 @@ class TransactionHistory extends React.Component {
             }
         });
     };
+
+    beautifyTransactions(transactions) {
+        console.log(transactions);
+        const MONTHS = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+        const formatTime = (year, month, day) => {
+            return MONTHS[month - 1] + " " + day.toString() + ", " + year.toString();
+        };
+        const formatMoney = (dollars, cents) => {
+            let pre = "";
+            let post = "";
+            if (dollars < 0 || cents < 0) {
+                pre = "(" + pre;
+                post = post + ")";
+            }
+            let newCents = Math.abs(cents).toString();
+            newCents = (newCents.length === 1) ? "0" + newCents: newCents;
+            const newDollars = Math.abs(dollars).toString();
+            return "$" + " " + pre + newDollars + "." + newCents + post;
+        }
+        return transactions.map((row) => {
+            return {
+                date: formatTime(row["timeYear"], row["timeMonth"], row["timeDay"]),
+                transaction: formatMoney(row["amountDollars"], row["amountCents"]),
+                balance: formatMoney(row["endBalanceDollars"], row["endBalanceCents"]),
+                vendor: row["vendor"]
+            };
+        })
+    }
 
     decPage = () => {
         if(this.state.pageNumber > 0) {
