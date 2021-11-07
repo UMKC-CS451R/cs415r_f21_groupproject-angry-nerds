@@ -1,6 +1,6 @@
 import React from 'react';
 import { Redirect, withRouter } from 'react-router';
-// import RefreshUser from '../SignIn/RefreshUser';
+import { RefreshUser, GetUser } from '../SignIn/User';
 import { Columns } from './Columns';
 import TransactionTable from './TransactionTable';
 import './style.css';
@@ -20,21 +20,48 @@ class TransactionHistory extends React.Component {
     }
 
     componentDidMount() {
-        const paramId = this.props.match.params["id"];
-        const localUser = JSON.parse(window.localStorage.getItem("user"));
-        this.setState({id:paramId, user:localUser}, () => {
-            if (!this.verifyLoggedIn()) {
-                this.setState({redirect: "/signin"});
-            }
-            else if (this.state.user["accounts"].length - 1 < this.state.id){
-                this.setState({redirect: "./0"}, () => {
-                    this.setState({redirect: null, id:0}, () => this.getTransactions());
-                });
-            }
-            else{
-                this.getTransactions(); 
-            }
+        let paramId = this.props.match.params["id"];
+        const localUserString = window.localStorage.getItem("user");
+        console.log(localUserString);
+
+        if (localUserString === null || localUserString === 'undefined'){
+            this.setState({redirect: "/signin"});
+            return;
+        }
+        const parsedUser = JSON.parse(localUserString);
+        console.log(parsedUser);
+
+        if (parsedUser["tokenExpires"] <= Date.now()) {
+            this.setState({redirect:"/signin"});
+            return;
+        }
+        
+        RefreshUser(parsedUser)
+        .then((refreshedUser) => GetUser(refreshedUser))
+        .then((response) => {
+            window.localStorage.setItem("user", JSON.stringify(response));
+            this.setState({user:response, id:paramId}, () => {
+                if (this.state.user["accounts"].length - 1 < this.state.id){
+                    this.setState({redirect: "./0"}, () => {
+                        this.setState({redirect: null, id:0}, () => this.getTransactions());
+                    });
+                }
+                else{
+                    this.getTransactions(); 
+                }
+            });
         });
+
+        // this.setState({id:paramId, user:localUser}, () => {
+        //     if (this.state.user["accounts"].length - 1 < this.state.id){
+        //         this.setState({redirect: "./0"}, () => {
+        //             this.setState({redirect: null, id:0}, () => this.getTransactions());
+        //         });
+        //     }
+        //     else{
+        //         this.getTransactions(); 
+        //     }
+        // });
     }
 
     verifyLoggedIn() {
@@ -45,37 +72,40 @@ class TransactionHistory extends React.Component {
             return false;
         }
         else {
-            this.refreshUser();      
+            const newUser = RefreshUser();   
+            console.log(newUser); 
+            this.setState({user:newUser});
+            window.localStorage.setItem("user", JSON.stringify(newUser));  
             return true;
         }
     }
     
-    refreshUser() {
-        let API = "https://localhost:44347/api/";
-        let query = "refreshToken";
-        fetch(API + query, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + this.state.user["token"]
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                response.json().then(json => {
-                    let newUser = this.state.user;
-                    newUser["token"] = json["token"];
-                    newUser["tokenExpires"] = json["tokenExpires"];
-                    this.setState({user:newUser});
-                    window.localStorage.setItem("user", JSON.stringify(newUser));
-                });
-            }
-            else {
-                return null;
-            }
-        });
-    }
+    // refreshUser() {
+    //     let API = "https://localhost:44347/api/";
+    //     let query = "refreshToken";
+    //     fetch(API + query, {
+    //         method: 'GET',
+    //         mode: 'cors',
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             "Authorization": "Bearer " + this.state.user["token"]
+    //         }
+    //     })
+    //     .then(response => {
+    //         if (response.ok) {
+    //             response.json().then(json => {
+    //                 let newUser = this.state.user;
+    //                 newUser["token"] = json["token"];
+    //                 newUser["tokenExpires"] = json["tokenExpires"];
+    //                 this.setState({user:newUser});
+    //                 window.localStorage.setItem("user", JSON.stringify(newUser));
+    //             });
+    //         }
+    //         else {
+    //             return null;
+    //         }
+    //     });
+    // }
 
     getTransactions() {
         let API = "https://localhost:44347/api/";

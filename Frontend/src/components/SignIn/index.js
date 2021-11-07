@@ -62,44 +62,17 @@ class SignIn extends React.Component {
         .then(response => {
           if (response.ok) {
             response.json().then(json => {
+              window.localStorage.setItem("user", JSON.stringify(json));
               this.setState({user: json}, () => {
-                this.getUser()
+                this.setState({redirect: "/"});
               });
-              // console.log(this.state.user);
-              // window.localStorage.setItem("user", JSON.stringify(json));
             });
-            // window.localStorage.setItem("user", this.state.user);
-            // this.setState({user:JSON.parse(window.localStorage.getItem("user"))});
-            // this.getUser();
-            // console.log(this.state.user);
-            this.setState({redirect: "/"});
           }
           else {
             response.json().then(json => this.setState({message: json["message"]}));
           }
         })
       }
-
-      getUser() {
-        let API = "https://localhost:44347/api/";
-        let query = "getUser";
-        console.log(this.state.user);
-        fetch(API + query, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + this.state.user["token"]
-            },
-            body: JSON.stringify({"UserId": this.state.user["userId"]})
-        })
-        .then(response => response.json())
-        .then(json => {
-            const newUser = {...this.state.user, "accounts": json.accounts};
-            window.localStorage.setItem("user", JSON.stringify(newUser));
-            this.setState({user:newUser});
-        });        
-      };  
 
 render() {
     if (this.state.redirect) {
