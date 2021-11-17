@@ -58,7 +58,7 @@ def test_request_error_no_content(id, page_size, page_number, auth_token1, endpo
             "pageNumber":page_number
         }
     )
-    assert response.status_code == 204
+    assert response.status_code == 404
 
 @pytest.mark.parametrize(
     "id, page_size, page_number", 

@@ -21,4 +21,9 @@ namespace Backend.Models.API
     {
         public int UserId { get; set; }
     }
+
+    public class RequestAccount
+    {
+        public int AccountId { get; set; }
+    }
 }

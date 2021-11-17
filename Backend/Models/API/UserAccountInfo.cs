@@ -13,6 +13,18 @@ namespace Backend.Models.API
         public int EndBalanceDollars { get; set; }
         public int EndBalanceCents { get; set; }
     }
+    public class AccountInfo
+    {
+        public int AccountId { get; set; }
+        public string TypeDescription { get; set; }
+        public int EndBalanceDollars { get; set; }
+        public int EndBalanceCents { get; set; }
+        public List<User> Users { get; set; }
+        public AccountInfo()
+        {
+            Users = new List<User>();
+        }
+    }
     public class UserInfo
     {
         public int UserId { get; set; }

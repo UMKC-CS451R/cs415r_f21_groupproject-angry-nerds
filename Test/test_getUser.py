@@ -18,7 +18,7 @@ def validation1():
                 'accountId': 211111110,
                 'typeDescription': 'Savings',
                 'endBalanceDollars': 4571,
-                'endBalanceCents': 8
+                'endBalanceCents': 80
             }
         ]
     }
