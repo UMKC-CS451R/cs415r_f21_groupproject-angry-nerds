@@ -18,6 +18,7 @@ import {
 
 const Navbar = ({ toggle }) => {
   const [scrollNav, setScrollNav] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const changeNav = () => {
     if (window.scrollY >= 80) {
@@ -29,6 +30,7 @@ const Navbar = ({ toggle }) => {
 
   useEffect(() => {
     window.addEventListener('scroll', changeNav);
+    isLoggedIn();
   }, []);
 
   const toggleHome = () => {
@@ -37,14 +39,17 @@ const Navbar = ({ toggle }) => {
 
   const isLoggedIn = () => {
     const localUserString = window.localStorage.getItem("user");
-    console.log(localUserString);
-    const ans = !(localUserString === null || localUserString === 'undefined');
-    console.log(ans);
-    return ans;
+    if (localUserString === null || localUserString === 'undefined') {
+      setLoggedIn(false); return;
+    }  
+    const parsedUser = JSON.parse(localUserString);
+    if (parsedUser["tokenExpires"] <= Date.now()) {
+      setLoggedIn(false); return;
+    }
+    setLoggedIn(true);
   };
 
   const userBtn = () => {
-    const loggedIn = isLoggedIn();
     if (loggedIn) {
       return (
         <NavBtnLink to='/signout'>Sign Out</NavBtnLink>
