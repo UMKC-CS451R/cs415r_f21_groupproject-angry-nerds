@@ -35,6 +35,28 @@ const Navbar = ({ toggle }) => {
     scroll.scrollToTop();
   };
 
+  const isLoggedIn = () => {
+    const localUserString = window.localStorage.getItem("user");
+    console.log(localUserString);
+    const ans = !(localUserString === null || localUserString === 'undefined');
+    console.log(ans);
+    return ans;
+  };
+
+  const userBtn = () => {
+    const loggedIn = isLoggedIn();
+    if (loggedIn) {
+      return (
+        <NavBtnLink to='/signout'>Sign Out</NavBtnLink>
+      );
+    }
+    else {
+      return (
+        <NavBtnLink to='/signin'>Sign In</NavBtnLink>
+      );
+    }
+  };
+
   return (
     <>
       <IconContext.Provider value={{ color: '#fff' }}>
@@ -96,9 +118,7 @@ const Navbar = ({ toggle }) => {
                 </NavLinks>
               </NavItem>
             </NavMenu>
-            <NavBtn>
-              <NavBtnLink to='/signin'>Sign In</NavBtnLink>
-            </NavBtn>
+            <NavBtn>{userBtn()}</NavBtn>
           </NavbarContainer>
         </Nav>
       </IconContext.Provider>

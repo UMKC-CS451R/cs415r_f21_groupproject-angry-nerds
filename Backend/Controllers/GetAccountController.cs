@@ -122,7 +122,7 @@ namespace Backend.Controllers.API
             if (account.Users.Count == 0)
             {
                 // Account does not exist (StatusCode: 204)
-                return NoContent();
+                return NotFound();
             }
 
             // verify user can see this transaction

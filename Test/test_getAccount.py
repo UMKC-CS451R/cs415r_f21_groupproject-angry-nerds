@@ -36,7 +36,7 @@ def test_request_error_no_content(id, auth_token1, endpoint_url):
             "AccountId":id
         }
     )
-    assert response.status_code == 204
+    assert response.status_code == 404
 
 @pytest.mark.parametrize(
     "id", 
