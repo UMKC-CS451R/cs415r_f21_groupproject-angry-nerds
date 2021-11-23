@@ -64,7 +64,7 @@ class SignIn extends React.Component {
             response.json().then(json => {
               window.localStorage.setItem("user", JSON.stringify(json));
               this.setState({user: json}, () => {
-                this.setState({redirect: "/"});
+                this.setState({redirect: "/customer/dashboard"});
               });
             });
           }
