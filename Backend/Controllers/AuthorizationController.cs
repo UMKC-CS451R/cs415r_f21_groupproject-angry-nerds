@@ -37,8 +37,14 @@ namespace Backend.Controllers
         [Route("api/refreshToken")]
         public IActionResult ReAuthenticate()
         {
+            // only error is 500, which is returned automatically
             var user = (User)HttpContext.Items["User"];
-            return Ok(new AuthenticateResponse(user));
+            var myResponse = _userService.ReAuthenticate(user);
+            if (myResponse == null) 
+            { 
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError); 
+            }
+            return Ok(myResponse);
         }
     }
 }

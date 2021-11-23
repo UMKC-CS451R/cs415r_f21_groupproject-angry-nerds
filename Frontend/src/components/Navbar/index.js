@@ -18,6 +18,7 @@ import {
 
 const Navbar = ({ toggle }) => {
   const [scrollNav, setScrollNav] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const changeNav = () => {
     if (window.scrollY >= 80) {
@@ -29,10 +30,36 @@ const Navbar = ({ toggle }) => {
 
   useEffect(() => {
     window.addEventListener('scroll', changeNav);
+    isLoggedIn();
   }, []);
 
   const toggleHome = () => {
     scroll.scrollToTop();
+  };
+
+  const isLoggedIn = () => {
+    const localUserString = window.localStorage.getItem("user");
+    if (localUserString === null || localUserString === 'undefined') {
+      setLoggedIn(false); return;
+    }  
+    const parsedUser = JSON.parse(localUserString);
+    if (parsedUser["tokenExpires"] <= Date.now()) {
+      setLoggedIn(false); return;
+    }
+    setLoggedIn(true);
+  };
+
+  const userBtn = () => {
+    if (loggedIn) {
+      return (
+        <NavBtnLink to='/signout'>Sign Out</NavBtnLink>
+      );
+    }
+    else {
+      return (
+        <NavBtnLink to='/signin'>Sign In</NavBtnLink>
+      );
+    }
   };
 
   return (
@@ -96,9 +123,7 @@ const Navbar = ({ toggle }) => {
                 </NavLinks>
               </NavItem>
             </NavMenu>
-            <NavBtn>
-              <NavBtnLink to='/signin'>Sign In</NavBtnLink>
-            </NavBtn>
+            <NavBtn>{userBtn()}</NavBtn>
           </NavbarContainer>
         </Nav>
       </IconContext.Provider>

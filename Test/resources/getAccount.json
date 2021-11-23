@@ -1,0 +1,14 @@
+{
+    "accountId": 822222228,
+    "typeDescription": "Checking",
+    "endBalanceDollars": 1989,
+    "endBalanceCents": 60,
+    "users": [
+        {
+            "userId": 2,
+            "firstName": "Lauren",
+            "lastName": "Graham",
+            "email": "test@mail.fakesite.edu"
+        }
+    ]
+}

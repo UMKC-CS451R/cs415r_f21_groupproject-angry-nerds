@@ -16,4 +16,14 @@ namespace Backend.Models.API
     {
         public int TransactionId { get; set; }
     }
+
+    public class RequestUser
+    {
+        public int UserId { get; set; }
+    }
+
+    public class RequestAccount
+    {
+        public int AccountId { get; set; }
+    }
 }
