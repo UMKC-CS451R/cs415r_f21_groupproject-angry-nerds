@@ -18,17 +18,18 @@ class SignIn extends React.Component {
 
     constructor (props) { 
         super(props);
-    
+
         this.state = {
             redirect: null,
             message: "",
             email: "",
             password: "",
-            hits: [],
+            user: {},
         };
     
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        // console.log(props);
       }
     
       handleChange = event => {
@@ -47,30 +48,8 @@ class SignIn extends React.Component {
         return this.state.password.length > 0 && this.state.email.length > 0;
       }
 
-      handleResponse(data) {
-          var code = Promise.resolve(data["statusCode"]);
-          var json = async() => { await data["json"] };
-          console.log(code.value);
-          console.log(json["message"]);
-          if (code === 200) {
-            // var json = response.json();
-            window.localStorage.setItem("user", JSON.stringify(data["json"]));
-            // console.log(temp);
-            // window.localStorage.setItem("user", JSON.stringify(temp));
-            // this.setState({redirect: "/"});
-          }
-          else if (code === 400) {
-            console.log("hi");
-            console.log(data["json"].message);
-            this.setState({message: data["json"]["message"]});
-          }
-          else {
-            this.setState({message: "Server Error"});
-          }
-      }
-
       callAPI(){
-        let API = "https://localhost:5001/api/";
+        let API = "https://localhost:44347/api/";
         let query = "getToken";
         fetch(API + query, {
             method: 'POST',
@@ -82,33 +61,18 @@ class SignIn extends React.Component {
         })
         .then(response => {
           if (response.ok) {
-            response.json().then(json => 
-              window.localStorage.setItem("user", JSON.stringify(json)));
-            this.setState({redirect: "/"});
+            response.json().then(json => {
+              window.localStorage.setItem("user", JSON.stringify(json));
+              this.setState({user: json}, () => {
+                this.setState({redirect: "/customer/dashboard"});
+              });
+            });
           }
           else {
             response.json().then(json => this.setState({message: json["message"]}));
           }
         })
-        // .then(json => );
-        // console.log(this.state.hits);
       }
-
-      getTransaction() {
-        let API = "https://localhost:5001/api/";
-        let query = "getTransaction";
-        fetch(API + query, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("user"))["token"]
-            },
-            body: JSON.stringify({"TransactionID": 1})
-        })
-        .then(response => response.json())
-        .then(json => console.log(json));
-      };
 
 render() {
     if (this.state.redirect) {
