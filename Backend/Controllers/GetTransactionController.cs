@@ -10,6 +10,7 @@ using MySqlConnector;
 using Backend.Entities;
 using Backend.Services;
 using Backend.Models.API;
+using Backend.Helpers;
 
 namespace Backend.Controllers.API
 {
@@ -103,7 +104,9 @@ namespace Backend.Controllers.API
             {
                 return Unauthorized();
             }
-
+            //test email move to post transactions with rules...
+            EmailHelper email= new EmailHelper(_configuration);
+            email.send();
             // StatusCode: 200
             return Ok(transaction);
         }
