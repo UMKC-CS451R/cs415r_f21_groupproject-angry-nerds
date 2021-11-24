@@ -15,35 +15,32 @@ namespace Backend.Controllers.API
 {
     [Authorize]
     [ApiController]
-    public class GetTransactionHistoryController : ControllerBase
+    public class GetUserController : ControllerBase
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
-        private IUserService _userService;
 
-        public GetTransactionHistoryController(
+        public GetUserController(
             IConfiguration configuration, 
-            ILogger<GetTransactionHistoryController> logger, 
+            ILogger<GetUserController> logger, 
             IUserService userService)
         {
             _configuration = configuration;
             _logger = logger;
-            _userService = userService;
         }
 
         [HttpPost]
-        [Route("api/getTransactionHistory")]
-        public async Task<ActionResult> GetTransactionHistory([FromBody] RequestTransactionHistory body) 
+        [Route("api/getUser")]
+        public async Task<ActionResult> GetUser([FromBody] RequestUser body) 
         {
             User user = (User)HttpContext.Items["User"];
-            if (!(await _userService.VerifyAccount(user, body.AccountId)))
+            if (user.UserId != body.UserId)
             {
                 return Unauthorized();
             }
 
             string connString = this._configuration.GetConnectionString("localDB");
-            TransactionHistory history = new TransactionHistory();
-
+            List<Account> accounts = new List<Account>();
             try
             {
                 //sql connection object
@@ -51,8 +48,8 @@ namespace Backend.Controllers.API
 
                 //retrieve the SQL Server instance version
                 string filePath = string.Join(
-                    Path.DirectorySeparatorChar, 
-                    new List<string> { "SQL", "getTransactionHistory.sql" }
+                    Path.DirectorySeparatorChar,
+                    new List<string> { "SQL", "getUserAccounts.sql" }
                 );
                 string query = System.IO.File.ReadAllText(filePath);
 
@@ -61,47 +58,37 @@ namespace Backend.Controllers.API
 
                 //define the SqlCommand object and execute
                 using var cmd = new MySqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@ID", body.AccountId);
-                cmd.Parameters.AddWithValue("@START_ROW", body.PageSize * body.PageNumber);
-                cmd.Parameters.AddWithValue("@NUM_ROWS", body.PageSize);
+                cmd.Parameters.AddWithValue("@ID", user.UserId);
 
                 // using var cmd = new MySqlCommand(query, conn);
                 using var reader = await cmd.ExecuteReaderAsync();
-                _logger.LogInformation(string.Format("Retrieving TransactionHistory for AccountID={0} from database.", body.AccountId));
+                _logger.LogInformation(string.Format("Retrieving Accounts for UserID={0} from database.", user.UserId));
 
                 //check if there are records
                 while (await reader.ReadAsync())
                 {
-
-                    history.Transactions.Add(new Transaction()
+                    accounts.Add(new Account()
                     {
-                        TransactionID = reader.GetInt32(0),
-                        TimeMonth = reader.GetInt32(1),
-                        TimeDay = reader.GetInt32(2),
-                        TimeYear = reader.GetInt32(3),
-                        AmountDollars = reader.GetInt32(4),
-                        AmountCents = reader.GetInt32(5),
-                        EndBalanceDollars = reader.GetInt32(6),
-                        EndBalanceCents = reader.GetInt32(7),
-                        Vendor = reader.GetString(8),
+                        AccountId = reader.GetInt32(0),
+                        TypeDescription = reader.GetString(1),
+                        EndBalanceDollars = reader.GetInt32(2),
+                        EndBalanceCents = reader.GetInt32(3)
                     });
                 }
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
-                // StatusCode: 500
-                return Problem("Error accessing database, contact site admin for more info");
             }
 
-            if (Helpers.IsEmpty(history.Transactions))
+            if (Helpers.IsEmpty(accounts))
             {
                 // Account does not exist (StatusCode: 204)
-                return NotFound();
+                return NoContent();
             }
 
             // StatusCode: 200
-            return Ok(history);
+            return Ok(new UserInfo(user, accounts));
         }
     }
 }

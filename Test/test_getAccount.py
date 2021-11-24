@@ -4,66 +4,50 @@ import requests
 
 @pytest.fixture()
 def endpoint_url(base_url):
-    return f"{base_url}/api/getTransaction"
+    return f"{base_url}/api/getAccount"
 
 @pytest.fixture()
-def validation1():
-    with open("Test/resources/getTransaction1.json", "r") as f:
+def validation():
+    with open("Test/resources/getAccount.json", "r") as f:
         return json.load(f)
 
-@pytest.fixture()
-def validation2():
-    with open("Test/resources/getTransaction2.json", "r") as f:
-        return json.load(f)
 
-def test_valid1(endpoint_url, auth_token1, validation1):
-    response = requests.post(
-        endpoint_url, 
-        verify=False, 
-        headers={"Authorization": f"Bearer {auth_token1}"},
-        json={
-            "TransactionId":1
-        }
-    )
-    assert response.status_code == 200
-    assert response.json() == validation1 
-
-def test_valid2(endpoint_url, auth_token2, validation2):
+def test_valid(endpoint_url, auth_token2, validation):
     response = requests.post(
         endpoint_url, 
         verify=False, 
         headers={"Authorization": f"Bearer {auth_token2}"},
         json={
-            "TransactionId":117
+            "AccountId":822222228
         }
     )
     assert response.status_code == 200
-    assert response.json() == validation2
+    assert response.json() == validation 
 
 @pytest.mark.parametrize(
     "id", 
-    [(0)])
+    [(213)])
 def test_request_error_no_content(id, auth_token1, endpoint_url):
     response = requests.post(
         endpoint_url, 
         verify=False, 
         headers={"Authorization": f"Bearer {auth_token1}"},
         json={
-            "TransactionId":id
+            "AccountId":id
         }
     )
-    assert response.status_code == 204
+    assert response.status_code == 404
 
 @pytest.mark.parametrize(
     "id", 
-    [(98)])
+    [(411111111)])
 def test_request_error_unauthorized(id, auth_token1, endpoint_url):
     response = requests.post(
         endpoint_url, 
         verify=False, 
         headers={"Authorization": f"Bearer {auth_token1}"},
         json={
-            "TransactionId":id
+            "AccountId":id
         }
     )
     assert response.status_code == 401

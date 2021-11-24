@@ -9,7 +9,7 @@ namespace Backend.Models
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Token { get; set; }
-
+        public long TokenExpires { get; set; }
 
         public AuthenticateResponse(User user)
         {
@@ -17,6 +17,18 @@ namespace Backend.Models
             FirstName = user.FirstName;
             LastName = user.LastName;
             Email = user.Email;
+        }
+    }
+
+    public class RefreshResponse
+    {
+        public int UserId { get; set; }
+        public string Token { get; set; }
+        public long TokenExpires { get; set; }
+
+        public RefreshResponse(User user)
+        {
+            UserId = user.UserId;
         }
     }
 }

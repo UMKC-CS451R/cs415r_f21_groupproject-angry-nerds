@@ -8,10 +8,22 @@ namespace Backend.Models.API
 {
     public class Account
     {
-        public int AccountID { get; set; }
+        public int AccountId { get; set; }
         public string TypeDescription { get; set; }
         public int EndBalanceDollars { get; set; }
         public int EndBalanceCents { get; set; }
+    }
+    public class AccountInfo
+    {
+        public int AccountId { get; set; }
+        public string TypeDescription { get; set; }
+        public int EndBalanceDollars { get; set; }
+        public int EndBalanceCents { get; set; }
+        public List<User> Users { get; set; }
+        public AccountInfo()
+        {
+            Users = new List<User>();
+        }
     }
     public class UserInfo
     {
@@ -32,6 +44,15 @@ namespace Backend.Models.API
             Email = user.Email;
             
             Accounts = new List<Account>();
+        }
+        public UserInfo(User user, List<Account> accountList)
+        {
+            UserId = user.UserId;
+            FirstName = user.FirstName;
+            LastName = user.LastName;
+            Email = user.Email;
+
+            Accounts = accountList;
         }
     }
 }

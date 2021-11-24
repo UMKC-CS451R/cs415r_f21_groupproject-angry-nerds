@@ -8,7 +8,7 @@
             "amountDollars": -8,
             "amountCents": 0,
             "endBalanceDollars": 4571,
-            "endBalanceCents": 8,
+            "endBalanceCents": 80,
             "vendor": "Starbucks"
         },
         {
@@ -19,7 +19,7 @@
             "amountDollars": -46,
             "amountCents": 0,
             "endBalanceDollars": 4579,
-            "endBalanceCents": 8,
+            "endBalanceCents": 80,
             "vendor": "Cheesecake Factory"
         },
         {
@@ -30,7 +30,7 @@
             "amountDollars": -180,
             "amountCents": 0,
             "endBalanceDollars": 4625,
-            "endBalanceCents": 8,
+            "endBalanceCents": 80,
             "vendor": "Pottery Barn"
         },
         {
@@ -41,7 +41,7 @@
             "amountDollars": 810,
             "amountCents": 0,
             "endBalanceDollars": 4805,
-            "endBalanceCents": 8,
+            "endBalanceCents": 80,
             "vendor": "Payroll"
         },
         {
@@ -52,7 +52,7 @@
             "amountDollars": -22,
             "amountCents": 0,
             "endBalanceDollars": 3995,
-            "endBalanceCents": 8,
+            "endBalanceCents": 80,
             "vendor": "CVS"
         }
     ]

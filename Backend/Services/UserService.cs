@@ -23,8 +23,9 @@ namespace Backend.Services
     public interface IUserService
     {
         Task<AuthenticateResponse> Authenticate(AuthenticateRequest model);
-        Task<Tuple<User, string>> ReAuthenticate(string token);
+        RefreshResponse ReAuthenticate(User user);
         Task<User> GetById(int id);
+        Task<User> VerifyUser(string token);
         Task<bool> VerifyAccount(User user, int accountId);
     }
 
@@ -33,6 +34,7 @@ namespace Backend.Services
         private readonly AppSettingsAccessor _appSettings;
         private readonly string _connString;
         private readonly ILogger _logger;
+        private readonly double _tokenLength = 15.0;
 
         public UserService(ILogger<UserService> logger, IOptions<AppSettingsAccessor> appSettings)
         {
@@ -104,14 +106,33 @@ namespace Backend.Services
             if (!hash.SequenceEqual(user.Pwd)) return null;
 
             // authentication successful so generate jwt token
+            long TokenExpires = ((DateTimeOffset)DateTime.UtcNow.AddMinutes(_tokenLength)).ToUnixTimeMilliseconds();
             var token = generateJwtToken(user);
 
-            return new AuthenticateResponse(user) { Token = token };
+            return new AuthenticateResponse(user) { 
+                Token = token,
+                TokenExpires = TokenExpires
+            };
         }
 
-        public async Task<Tuple<User, string>> ReAuthenticate(string token)
+        public RefreshResponse ReAuthenticate(User user)
         {
-            try 
+            if (user == null) return null;
+
+            // authentication successful so generate jwt token
+            long TokenExpires = ((DateTimeOffset)DateTime.UtcNow.AddMinutes(_tokenLength)).ToUnixTimeMilliseconds();
+            var newToken = generateJwtToken(user);
+
+            return new RefreshResponse(user)
+            {
+                Token = newToken,
+                TokenExpires = TokenExpires
+            };            
+        }
+
+        public async Task<User> VerifyUser(string token)
+        {
+            try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_appSettings.AppSettings.Secret);
@@ -129,15 +150,12 @@ namespace Backend.Services
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
                 var user = await GetById(userId);
-                if (user == null) return new Tuple<User, string>(null, null);
-
-                // authentication successful so generate jwt token
-                return new Tuple<User, string>(user, generateJwtToken(user));
+                return user;
             }
-            catch 
+            catch
             {
                 // JWT verification failed
-                return new Tuple<User, string>(null, null);
+                return null;
             }
         }
 
@@ -217,7 +235,7 @@ namespace Backend.Services
                 {
                     accounts.Add(new Account()
                     {
-                        AccountID = reader.GetInt32(0),
+                        AccountId = reader.GetInt32(0),
                         TypeDescription = reader.GetString(1),
                         EndBalanceDollars = reader.GetInt32(2),
                         EndBalanceCents = reader.GetInt32(3)
@@ -228,7 +246,7 @@ namespace Backend.Services
             {
                 _logger.LogError(e.Message);
             }
-            return accounts.SingleOrDefault(x => x.AccountID == accountId) != null;
+            return accounts.SingleOrDefault(x => x.AccountId == accountId) != null;
         }
 
         // helper methods
@@ -241,7 +259,7 @@ namespace Backend.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("id", user.UserId.ToString()) }),
-                Expires = DateTime.UtcNow.AddHours(1.0),
+                Expires = DateTime.UtcNow.AddMinutes(_tokenLength),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
