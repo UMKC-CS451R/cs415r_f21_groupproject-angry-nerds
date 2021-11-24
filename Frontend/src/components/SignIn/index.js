@@ -70,7 +70,7 @@ class SignIn extends React.Component {
       }
 
       callAPI(){
-        let API = "https://localhost:44347/api/";
+        let API = "https://localhost:5001/api/";
         let query = "getToken";
         fetch(API + query, {
             method: 'POST',
@@ -95,7 +95,7 @@ class SignIn extends React.Component {
       }
 
       getTransaction() {
-        let API = "https://localhost:44347/api/";
+        let API = "https://localhost:5001/api/";
         let query = "getTransaction";
         fetch(API + query, {
             method: 'POST',
