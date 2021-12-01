@@ -10,7 +10,7 @@ export const homeObjOne = {
       'Get access to our exclusive app that allows you to send unlimited transactions without getting charged any fees',
     buttonLabel: 'Get Started',
     imgStart: false,
-    img: '../../images/unlimited.png',
+    img: '../../images/unlimited.jpg',
     alt: 'Weird',
     dark: true,
     primary: true,

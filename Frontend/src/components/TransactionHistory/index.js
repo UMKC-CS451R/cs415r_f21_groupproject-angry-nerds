@@ -3,7 +3,7 @@ import { Redirect, withRouter } from 'react-router';
 import { RefreshUser, GetUser } from '../SignIn/User';
 import { Columns } from './Columns';
 import TransactionTable from './TransactionTable';
-import './style.css';
+import './TableStyling.js';
 
 class TransactionHistory extends React.Component {
     constructor (props) { 

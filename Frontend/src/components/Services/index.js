@@ -35,7 +35,7 @@ const Services = () => {
           <ServicesIcon src={Icon3} />
           <ServicesH2>Commerce Bank Benefits</ServicesH2>
           <ServicesP>
-            Unlock our special membership card that returns 10% cash back.
+            Unlock our special membership card that returns 15% cash back.
           </ServicesP>
         </ServicesCard>
       </ServicesWrapper>

@@ -82,7 +82,7 @@ render() {
         <>
           <Container>
             <FormWrap>
-              <Icon to='/'>Main Page</Icon>
+              <Icon to='/'>Home</Icon>
               <FormContent>
                 <Form onSubmit = {(e) => this.handleSubmit(e)}>
                   <FormH1>Sign in to your account</FormH1>
@@ -103,13 +103,10 @@ render() {
 }
 /*
 start a function to handle login
-
-
 handleLogin = (event) => {
     event.preventDefault();
     const { email, password } = this.state;
     const fieldsToValidate = [{ email }, { password }];
-
     const allFieldsEntered = validateFields(fieldsToValidate);
     if (!allFieldsEntered) {
       this.setState({
@@ -126,7 +123,6 @@ handleLogin = (event) => {
       // login successful
     }
   };
-
 const SignIn = () => {
   return (
     <>
@@ -149,7 +145,6 @@ const SignIn = () => {
     </>
   );
 };
-
 */
 
 export default SignIn;
