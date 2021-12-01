@@ -26,4 +26,12 @@ namespace Backend.Models.API
     {
         public int AccountId { get; set; }
     }
+
+    public class RequestAddAccount
+    {
+        public string AccountType { get; set; }
+        public List<int> Users { get; set; }
+        public int InitBalanceDollars { get; set; }
+        public int InitBalanceCents { get; set; }
+    }
 }

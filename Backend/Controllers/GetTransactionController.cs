@@ -23,7 +23,7 @@ namespace Backend.Controllers.API
 
         public GetTransactionController(
             IConfiguration configuration,
-            ILogger<GetTransactionHistoryController> logger,
+            ILogger<GetTransactionController> logger,
             IUserService userService)
         {
             _configuration = configuration;
