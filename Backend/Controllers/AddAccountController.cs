@@ -39,10 +39,10 @@ namespace Backend.Controllers.API
 
             // verify user is admin
             User user = (User)HttpContext.Items["User"];
-            /*if (user.role != "Admin")
+            if (!_userService.VerifyAdmin(user))
             {
                 return Unauthorized();
-            }*/
+            }
 
             // verify data? - none
             try

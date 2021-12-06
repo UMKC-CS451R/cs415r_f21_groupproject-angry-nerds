@@ -27,6 +27,7 @@ namespace Backend.Services
         Task<User> GetById(int id);
         Task<User> VerifyUser(string token);
         Task<bool> VerifyAccount(User user, int accountId);
+        bool VerifyAdmin(User user);
     }
 
     public class UserService : IUserService
@@ -78,15 +79,16 @@ namespace Backend.Services
                 while (await reader.ReadAsync())
                 {
                     byte[] rawSalt = new byte[24];
-                    reader.GetBytes(4, 0, rawSalt, 0, 24);
+                    reader.GetBytes(5, 0, rawSalt, 0, 24);
                     byte[] rawPwd = new byte[32];
-                    reader.GetBytes(5, 0, rawPwd, 0, 32);
+                    reader.GetBytes(6, 0, rawPwd, 0, 32);
                     users.Add(new User()
                     {
                         Email = reader.GetString(0),
                         UserId = reader.GetInt32(1),
                         FirstName = reader.GetString(2),
                         LastName = reader.GetString(3),
+                        Role = reader.GetString(4),
                         Salt = rawSalt,
                         Pwd = rawPwd
                     });
@@ -193,7 +195,8 @@ namespace Backend.Services
                         Email = reader.GetString(0),
                         UserId = reader.GetInt32(1),
                         FirstName = reader.GetString(2),
-                        LastName = reader.GetString(3)
+                        LastName = reader.GetString(3),
+                        Role = reader.GetString(4)
                     });
                 }
             }
@@ -247,6 +250,10 @@ namespace Backend.Services
                 _logger.LogError(e.Message);
             }
             return accounts.SingleOrDefault(x => x.AccountId == accountId) != null;
+        }
+
+        public bool VerifyAdmin(User user) {
+            return user.Role == "Admin";
         }
 
         // helper methods

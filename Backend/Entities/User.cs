@@ -10,6 +10,9 @@ namespace Backend.Entities
         public string Email { get; set; }
 
         [JsonIgnore]
+        public string Role { get; set; }
+
+        [JsonIgnore]
         public byte[] Salt { get; set; }
 
         [JsonIgnore]
