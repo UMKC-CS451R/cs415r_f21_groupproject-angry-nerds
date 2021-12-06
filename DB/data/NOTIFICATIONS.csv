@@ -1,0 +1,4 @@
+NoteID,NoteFnName,NoteDesc
+1,OutOfState,Notify user of transactions outside of their State
+2,Over50,Notify user of transactions over 50 dollars
+3,Deposit,Notify user of any deposit
