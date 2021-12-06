@@ -34,4 +34,9 @@ namespace Backend.Models.API
         public int InitBalanceDollars { get; set; }
         public int InitBalanceCents { get; set; }
     }
+    public class RequestAddAccountUser
+    {
+        public int AccountId { get; set; }
+        public List<int> Users { get; set; }
+    }
 }

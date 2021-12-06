@@ -3,7 +3,7 @@
 ## Backend
 Done at the moment in interest of development time
 
-# Add Account
+### Add Account
 Sign in as admin, add account, and verify it exists in DB
 ```
 import requests
@@ -19,3 +19,9 @@ response = requests.post("https://localhost:44347/api/addAccount", verify=False,
 assert response.status_code == 401
 ```
 
+### Add Account User
+Verify user is added to account with admin account
+Verify 401 with non-admin account
+```
+response = requests.post("https://localhost:44347/api/addAccountUser", verify=False, headers={"Authorization": f"Bearer {token}"}, json={"AccountId": 822222228, "Users": [1]})
+```
