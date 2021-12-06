@@ -85,6 +85,12 @@ namespace Backend.Controllers.API
                 return Problem("Error accessing database, contact site admin for more info");
             }
 
+            if (Helpers.IsEmpty(MessageHistory))
+            {
+                // Account does not exist (StatusCode: 204)
+                return NotFound();
+            }
+
             // StatusCode: 200
             return Ok(MessageHistory);
         }
