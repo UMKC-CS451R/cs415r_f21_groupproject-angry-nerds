@@ -11,6 +11,5 @@ CREATE TABLE transactions (
     LocationStCd varchar(2) NOT NULL,
     CountryCd varchar(2) NOT NULL,
     Vendor varchar(100) NOT NULL,
-    CONSTRAINT FK_AccountID FOREIGN KEY (AccountID) REFERENCES account(AccountID),
-    CONSTRAINT FK_Vendor FOREIGN KEY (Vendor) REFERENCES vendor_cat(Vendor)
+    CONSTRAINT FK_AccountID FOREIGN KEY (AccountID) REFERENCES account(AccountID)
 );
