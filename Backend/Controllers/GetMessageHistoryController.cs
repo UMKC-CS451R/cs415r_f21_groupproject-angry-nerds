@@ -1,0 +1,92 @@
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc;
+using MySqlConnector;
+using Backend.Entities;
+using Backend.Services;
+using Backend.Models.API;
+
+namespace Backend.Controllers.API
+{
+    [Authorize]
+    [ApiController]
+    public class GetMessageHistoryController : ControllerBase
+    {
+        private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
+        private IUserService _userService;
+
+        public GetMessageHistoryController(
+            IConfiguration configuration, 
+            ILogger<GetTransactionHistoryController> logger, 
+            IUserService userService)
+        {
+            _configuration = configuration;
+            _logger = logger;
+            _userService = userService;
+        }
+
+        [HttpPost]
+        [Route("api/getMessageHistory")]
+        public async Task<ActionResult> GetMessageHistory([FromBody] RequestMessageHistory body) 
+        {
+            User user = (User)HttpContext.Items["User"];
+
+            string connString = this._configuration.GetConnectionString("localDB");
+            List<Message> MessageHistory = new List<Message>();
+
+            try
+            {
+                //sql connection object
+                using var conn = new MySqlConnection(connString);
+
+                //retrieve the SQL Server instance version
+                string filePath = string.Join(
+                    Path.DirectorySeparatorChar, 
+                    new List<string> { "SQL", "getMessageHistory.sql" }
+                );
+                string query = System.IO.File.ReadAllText(filePath);
+
+                //open connection
+                await conn.OpenAsync();
+
+                //define the SqlCommand object and execute
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", user.UserId);
+                cmd.Parameters.AddWithValue("@START_ROW", body.PageSize * body.PageNumber);
+                cmd.Parameters.AddWithValue("@NUM_ROWS", body.PageSize);
+
+                // using var cmd = new MySqlCommand(query, conn);
+                using var reader = await cmd.ExecuteReaderAsync();
+                _logger.LogInformation(string.Format("Retrieving MessageHistory for UserID={0} from database.", user.UserId));
+
+                //check if there are records
+                while (await reader.ReadAsync())
+                {
+
+                    MessageHistory.Add(new Message()
+                    {
+                        Contents = reader.GetString(0),
+                        TimeMonth = reader.GetInt32(1),
+                        TimeDay = reader.GetInt32(2),
+                        TimeYear = reader.GetInt32(3)
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                // StatusCode: 500
+                return Problem("Error accessing database, contact site admin for more info");
+            }
+
+            // StatusCode: 200
+            return Ok(MessageHistory);
+        }
+    }
+}

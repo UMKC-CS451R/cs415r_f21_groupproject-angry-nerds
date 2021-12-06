@@ -52,4 +52,10 @@ namespace Backend.Models.API
         public string CountryCd { get; set; }
         public string Vendor { get; set; }
     }
+
+    public class RequestMessageHistory
+    {
+        public int PageSize { get; set; }
+        public int PageNumber { get; set; }
+    }
 }

@@ -33,3 +33,9 @@ Verify a new message is created for out of state transaction
  response = requests.post("https://localhost:44347/api/addTransaction", verify=False, headers={"Authorization": f"Bearer {token}"}, json={"AccountId": 822222228, "TimeMonth": 11, "TimeDay":
  3, "TimeYear": 2023, "AmountDollars": -3, "AmountCents": 87, "LocationStCd": "WA", "CountryCd":"US", "Vendor": "McDonalds"})
 ```
+
+### Get Message History
+Verify ability to read messages from transactions
+```
+response = requests.post("https://localhost:44347/api/getMessageHistory", verify=False, headers={"Authorization": f"Bearer {token}"}, json={"pageSize": 30, "pageNumber":0})
+```
