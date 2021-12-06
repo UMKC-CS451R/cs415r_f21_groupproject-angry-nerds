@@ -17,5 +17,17 @@ namespace Backend.Entities
 
         [JsonIgnore]
         public byte[] Pwd { get; set; }
+
+        [JsonIgnore]
+        public int SSN { get; set; }
+        [JsonIgnore]
+        public string AddressLine1 { get; set; }
+        [JsonIgnore]
+        public string AddressLine2 { get; set; }
+        [JsonIgnore]
+        public string City { get; set; }
+        [JsonIgnore]
+        public string PostalState { get; set; }
+
     }
 }
