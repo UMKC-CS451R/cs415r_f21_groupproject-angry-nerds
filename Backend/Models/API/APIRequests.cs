@@ -26,4 +26,36 @@ namespace Backend.Models.API
     {
         public int AccountId { get; set; }
     }
+
+    public class RequestAddAccount
+    {
+        public string AccountType { get; set; }
+        public List<int> Users { get; set; }
+        public int InitBalanceDollars { get; set; }
+        public int InitBalanceCents { get; set; }
+    }
+    public class RequestAddAccountUser
+    {
+        public int AccountId { get; set; }
+        public List<int> Users { get; set; }
+    }
+
+    public class RequestAddTransaction
+    {
+        public int AccountId { get; set; }
+        public int TimeMonth { get; set; }
+        public int TimeDay { get; set; }
+        public int TimeYear { get; set; }
+        public int AmountDollars { get; set; }
+        public int AmountCents { get; set; }
+        public string LocationStCd { get; set; }
+        public string CountryCd { get; set; }
+        public string Vendor { get; set; }
+    }
+
+    public class RequestMessageHistory
+    {
+        public int PageSize { get; set; }
+        public int PageNumber { get; set; }
+    }
 }

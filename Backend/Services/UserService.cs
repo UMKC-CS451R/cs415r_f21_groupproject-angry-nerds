@@ -25,8 +25,11 @@ namespace Backend.Services
         Task<AuthenticateResponse> Authenticate(AuthenticateRequest model);
         RefreshResponse ReAuthenticate(User user);
         Task<User> GetById(int id);
+        Task<User> GetFullUser(int id);
         Task<User> VerifyUser(string token);
         Task<bool> VerifyAccount(User user, int accountId);
+        bool VerifyAdmin(User user);
+        void Notify(User user, string note);
     }
 
     public class UserService : IUserService
@@ -78,15 +81,16 @@ namespace Backend.Services
                 while (await reader.ReadAsync())
                 {
                     byte[] rawSalt = new byte[24];
-                    reader.GetBytes(4, 0, rawSalt, 0, 24);
+                    reader.GetBytes(5, 0, rawSalt, 0, 24);
                     byte[] rawPwd = new byte[32];
-                    reader.GetBytes(5, 0, rawPwd, 0, 32);
+                    reader.GetBytes(6, 0, rawPwd, 0, 32);
                     users.Add(new User()
                     {
                         Email = reader.GetString(0),
                         UserId = reader.GetInt32(1),
                         FirstName = reader.GetString(2),
                         LastName = reader.GetString(3),
+                        Role = reader.GetString(4),
                         Salt = rawSalt,
                         Pwd = rawPwd
                     });
@@ -193,7 +197,59 @@ namespace Backend.Services
                         Email = reader.GetString(0),
                         UserId = reader.GetInt32(1),
                         FirstName = reader.GetString(2),
-                        LastName = reader.GetString(3)
+                        LastName = reader.GetString(3),
+                        Role = reader.GetString(4)
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+            }
+            return users.FirstOrDefault();
+        }
+
+        public async Task<User> GetFullUser(int id)
+        {
+            List<User> users = new List<User>();
+            try
+            {
+                //sql connection object
+                using var conn = new MySqlConnection(_connString);
+
+                //retrieve the SQL Server instance version
+                string filePath = string.Join(
+                    Path.DirectorySeparatorChar,
+                    new List<string> { "SQL", "getUserWithSPIById.sql" }
+                );
+                string query = System.IO.File.ReadAllText(filePath);
+
+                //open connection
+                await conn.OpenAsync();
+
+                //define the SqlCommand object and execute
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", id);
+
+                // using var cmd = new MySqlCommand(query, conn);
+                using var reader = await cmd.ExecuteReaderAsync();
+                _logger.LogInformation(string.Format("Retrieving User for UserID={0} from database.", id));
+
+                //check if there are records
+                while (await reader.ReadAsync())
+                {
+                    users.Add(new User()
+                    {
+                        Email = reader.GetString(0),
+                        UserId = reader.GetInt32(1),
+                        FirstName = reader.GetString(2),
+                        LastName = reader.GetString(3),
+                        Role = reader.GetString(4),
+                        SSN = reader.GetInt32(5),
+                        AddressLine1 = reader.GetString(6),
+                        AddressLine2 = reader.GetString(7),
+                        City = reader.GetString(8),
+                        PostalState = reader.GetString(9),
                     });
                 }
             }
@@ -247,6 +303,46 @@ namespace Backend.Services
                 _logger.LogError(e.Message);
             }
             return accounts.SingleOrDefault(x => x.AccountId == accountId) != null;
+        }
+
+        public bool VerifyAdmin(User user) {
+            return user.Role == "Admin";
+        }
+
+
+        public async void Notify(User user, string note)
+        {
+            try
+            {
+                //sql connection object
+                using var conn = new MySqlConnection(_connString);
+
+                //retrieve the SQL Server instance version
+                string filePath = string.Join(
+                    Path.DirectorySeparatorChar,
+                    new List<string> { "SQL", "addMessage.sql" }
+                );
+                string query = System.IO.File.ReadAllText(filePath);
+
+                //open connection
+                await conn.OpenAsync();
+                
+                //define the SqlCommand object and execute
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", user.UserId);
+                cmd.Parameters.AddWithValue("@Message", note);
+                cmd.Parameters.AddWithValue("@TimeYear", DateTime.Now.Year);
+                cmd.Parameters.AddWithValue("@TimeMonth", DateTime.Now.Month);
+                cmd.Parameters.AddWithValue("@TimeDay", DateTime.Now.Day);
+
+                // using var cmd = new MySqlCommand(query, conn);
+                using var reader = await cmd.ExecuteReaderAsync();
+                _logger.LogInformation(string.Format("Adding message for UserID={0} to database.", user.UserId));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+            }
         }
 
         // helper methods

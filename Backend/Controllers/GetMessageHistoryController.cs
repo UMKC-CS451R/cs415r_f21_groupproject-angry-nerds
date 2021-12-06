@@ -15,27 +15,30 @@ namespace Backend.Controllers.API
 {
     [Authorize]
     [ApiController]
-    public class GetTransactionController : Controller
+    public class GetMessageHistoryController : ControllerBase
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
         private IUserService _userService;
 
-        public GetTransactionController(
-            IConfiguration configuration,
-            ILogger<GetTransactionController> logger,
+        public GetMessageHistoryController(
+            IConfiguration configuration, 
+            ILogger<GetTransactionHistoryController> logger, 
             IUserService userService)
         {
             _configuration = configuration;
             _logger = logger;
             _userService = userService;
         }
+
         [HttpPost]
-        [Route("api/getTransaction")]
-        public async Task<ActionResult> GetTransaction([FromBody] RequestTransaction body)
+        [Route("api/getMessageHistory")]
+        public async Task<ActionResult> GetMessageHistory([FromBody] RequestMessageHistory body) 
         {
+            User user = (User)HttpContext.Items["User"];
+
             string connString = this._configuration.GetConnectionString("localDB");
-            List<TransactionInfo> transactions = new List<TransactionInfo>();
+            List<Message> MessageHistory = new List<Message>();
 
             try
             {
@@ -44,8 +47,8 @@ namespace Backend.Controllers.API
 
                 //retrieve the SQL Server instance version
                 string filePath = string.Join(
-                    Path.DirectorySeparatorChar,
-                    new List<string> { "SQL", "getTransaction.sql" }
+                    Path.DirectorySeparatorChar, 
+                    new List<string> { "SQL", "getMessageHistory.sql" }
                 );
                 string query = System.IO.File.ReadAllText(filePath);
 
@@ -54,30 +57,24 @@ namespace Backend.Controllers.API
 
                 //define the SqlCommand object and execute
                 using var cmd = new MySqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@ID", body.TransactionId);
+                cmd.Parameters.AddWithValue("@ID", user.UserId);
+                cmd.Parameters.AddWithValue("@START_ROW", body.PageSize * body.PageNumber);
+                cmd.Parameters.AddWithValue("@NUM_ROWS", body.PageSize);
 
                 // using var cmd = new MySqlCommand(query, conn);
                 using var reader = await cmd.ExecuteReaderAsync();
-                _logger.LogInformation(string.Format("Retrieving Transaction for TransactionId={0} from database.", body.TransactionId));
+                _logger.LogInformation(string.Format("Retrieving MessageHistory for UserID={0} from database.", user.UserId));
 
                 //check if there are records
                 while (await reader.ReadAsync())
                 {
 
-                    transactions.Add(new TransactionInfo()
+                    MessageHistory.Add(new Message()
                     {
-                        TransactionId = reader.GetInt32(0),
-                        AccountId = reader.GetInt32(1),
-                        TimeMonth = reader.GetInt32(2),
-                        TimeDay = reader.GetInt32(3),
-                        TimeYear = reader.GetInt32(4),
-                        AmountDollars = reader.GetInt32(5),
-                        AmountCents = reader.GetInt32(6),
-                        EndBalanceDollars = reader.GetInt32(7),
-                        EndBalanceCents = reader.GetInt32(8),
-                        LocationStCd = reader.GetString(9),
-                        CountryCd = reader.GetString(10),
-                        Vendor = reader.GetString(11)
+                        Contents = reader.GetString(0),
+                        TimeMonth = reader.GetInt32(1),
+                        TimeDay = reader.GetInt32(2),
+                        TimeYear = reader.GetInt32(3)
                     });
                 }
             }
@@ -88,24 +85,14 @@ namespace Backend.Controllers.API
                 return Problem("Error accessing database, contact site admin for more info");
             }
 
-            TransactionInfo transaction = transactions.SingleOrDefault();
-
-            // if the transaction does not exist, simply say that
-            if (transaction == null)
+            if (Helpers.IsEmpty(MessageHistory))
             {
                 // Account does not exist (StatusCode: 204)
-                return NoContent();
-            }
-
-            // verify user can see this transaction
-            User user = (User)HttpContext.Items["User"];
-            if (!(await _userService.VerifyAccount(user, transaction.AccountId)))
-            {
-                return Unauthorized();
+                return NotFound();
             }
 
             // StatusCode: 200
-            return Ok(transaction);
+            return Ok(MessageHistory);
         }
     }
 }
